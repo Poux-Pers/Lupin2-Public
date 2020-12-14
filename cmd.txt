@@ -1,0 +1,23 @@
+# Pull ES image on docker
+docker pull docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+
+# start ES server on Docker
+docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+
+# Start kibana on docker
+docker run --link bold_boyd:elasticsearch -p 5601:5601 docker.elastic.co/kibana/kibana:7.10.1
+
+# Git add all files
+git add .
+
+# Git commit/push
+git commit -m "commit name"
+git push -u origin files
+
+# Git connect
+git config --global user.name "Poux-Be"
+git config --global user.email "louis.poux@bearingpoint.com"
+
+# Links
+https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+https://www.elastic.co/guide/en/kibana/current/docker.html
