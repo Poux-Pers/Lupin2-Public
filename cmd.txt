@@ -12,7 +12,7 @@ git add .
 
 # Git commit/push
 git commit -m "commit name"
-git push -u origin files
+git push -u origin Lupin2
 
 # Git connect
 git config --global user.name "Poux-Be"
