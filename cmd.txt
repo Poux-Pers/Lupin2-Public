@@ -21,3 +21,9 @@ git config --global user.email "louis.poux@bearingpoint.com"
 # Links
 https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
 https://www.elastic.co/guide/en/kibana/current/docker.html
+
+# Git ignore dole folder
+# Erase from git the files
+git rm --cached -r Idea
+
+# Add to the info/exclude file their path

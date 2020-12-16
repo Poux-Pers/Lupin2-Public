@@ -2,7 +2,7 @@
     "Update_Values": true,
     "Mesh": "1d",
     "trend_length": 5,
-    "study_length": 8,
+    "study_length": 500,
     "initial_investment": 5000,
     "transaction_fees_percentage": 0.1,
     "ratio_of_gain_to_save": 0.1,

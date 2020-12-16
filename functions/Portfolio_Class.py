@@ -121,21 +121,21 @@ class Portfolio_class():
                 if BS_dict[company] == 'Buy' and symbol_current_value > 0:
                     
                     # Buy as much as possible
-                    nb_symbols_to_buy = (Portfolio['Money']['Spending Money']*self.ratio_max_investment_per_value)//symbol_current_value
+                    nb_symbols_to_buy = int((Portfolio['Money']['Spending Money']*self.ratio_max_investment_per_value)//symbol_current_value)
                     buy_value = nb_symbols_to_buy*symbol_current_value
                     
                     if nb_symbols_to_buy >=1:
                         # Portfolio update
-                        Portfolio['Money']['Spending Money'] -= buy_value
+                        Portfolio['Money']['Spending Money'] -= buy_value * (100 + self.transaction_fees_percentage)/100
                         Portfolio['Shares']['Count'][company] += nb_symbols_to_buy
                         Portfolio['Shares']['Buy_Value'][company] += buy_value
                         
                         # Print deal details
                         if self.BS_deals_print:
-                            print(str(nb_symbols_to_buy)+' x '+company+' bought at '+str(symbol_current_value)+' ('+str(buy_value)+'$ Total - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'+' - Savings: '+str(int(Portfolio['Money']['Savings']*1000)/1000)+'$')
+                            print(str(int(nb_symbols_to_buy))+' x '+company+' bought at '+str(symbol_current_value)+' ('+str(buy_value)+'$ Total - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'+' - Savings: '+str(int(Portfolio['Money']['Savings']*1000)/1000)+'$')
 
                 # ----- SELLING ------
-                nb_symbols_to_sell = Portfolio['Shares']['Count'][company]
+                nb_symbols_to_sell = int(Portfolio['Shares']['Count'][company])
 
                 if BS_dict[company] == 'Sell' and nb_symbols_to_sell >= 1 and symbol_current_value > 0:
                     # Sell all
