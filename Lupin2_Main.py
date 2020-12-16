@@ -18,6 +18,7 @@ from tqdm.auto import tqdm
 from functions.Portfolio_Class import Portfolio_class
 from functions.BuySell_Trend import BuySellTrend
 from functions.Dataset_Class import Dataset
+from functions.ES_interaction import Elasticsearch_class
 
 
 # -------------------- 
@@ -90,8 +91,9 @@ if __name__ == "__main__":
         list_Shares_value = []
         Portfolio_history = []
 
-        Portfolio = Portfolio_class(Parameters).reset()
-        Portfolio, Portfolio_history = Portfolio_class(Parameters).simulation(dataset, Portfolio)
+        Portfolio = Portfolio_class(Parameters)
+        Portfolio.reset()
+        last_portfolio, Portfolio_history = Portfolio.simulation(dataset, Portfolio.portfolio)
 
         # List construction
         for Savings in Portfolio_history:
@@ -105,21 +107,29 @@ if __name__ == "__main__":
         fig, axs = plt.subplots(3)
         fig.suptitle('Savings over time')
 
-        x_list = np.arange(0,len(dataset.columns.to_list()),1)
+        x_list = dataset.columns.to_list()[Parameters['trend_length']:]
 
         # Sub plot for the sum of the symbols
-        axs[0].plot(x_list, dataset.iloc[-1].to_list(), 'purple', label='NASDAQ')
+        axs[0].plot(x_list, dataset.iloc[-1].to_list()[Parameters['trend_length']:], 'purple', label='NASDAQ')
         
-        axs[1].plot(x_list[:-Parameters['trend_length']], list_Cash, 'r', label='Cash')
-        axs[1].plot(x_list[:-Parameters['trend_length']], list_Savings, 'b', label='Bank')
-        axs[1].plot(x_list[:-Parameters['trend_length']], list_Total_Value, 'black', label='Total')
-        axs[1].plot(x_list[:-Parameters['trend_length']], list_Shares_value, 'orange', label='Shares Value')
+        axs[1].plot(x_list, list_Cash, 'r', label='Cash')
+        axs[1].plot(x_list, list_Savings, 'b', label='Bank')
+        axs[1].plot(x_list, list_Total_Value, 'black', label='Total')
+        axs[1].plot(x_list, list_Shares_value, 'orange', label='Shares Value')
 
         # Sub plot for ROI
-        axs[2].plot(x_list[:-Parameters['trend_length']], list_ROI)
-        plt.show()
+        axs[2].plot(x_list, list_ROI)
+        plt.show(block = False)
 
-        print(Portfolio_history)
+        # Sending Portfolio to ES
+        i = 0
+        if Parameters['Send_Porfolio_to_ES']:
+            for portfolio in tqdm(Portfolio_history):
+                i += 1
+                Elasticsearch_class(Parameters).upload_dict(portfolio, i)
+        
+        print(Portfolio_history[-1])
+        plt.show()
 
 # -------------------- 
 # COMMENTS
@@ -135,10 +145,11 @@ if __name__ == "__main__":
 # Give parameters in BS functions like selling after high increase
 # If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
 # Comparainson to rating agencies
+# Scoring system!!!!!!!
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
 # Include volume
 # Inclue Companies info
 # (Further dev) Dashboard d'évolution des fonds avec une simulation 1min = 1 sec (plotly ?) 
-# Calculate trend compared to industry trend
+# Calculate trend compared to industry trend²

@@ -95,27 +95,31 @@ class Portfolio_class():
     def simulation(self, dataset, Portfolio):
         # Initialisation
         Portfolio_history = []
+
+        # Reducin the dataset only to the companies in the list
+        dataset = dataset[dataset.index.isin(self.companies_list+['NASDAQ'])]
         
         # Visual feedback
         print('Portfolio simulation in progress')
 
         for day in tqdm(range(self.trend_length, len(dataset.columns.to_list()))):
-            # Reducing the dataset to the trend period studied
+            # Reducing the dataset to the trend period studied and the companies in the companies list
             small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
 
             # Getting the list of the values to buy and their actual trend
             BS_dict, Trend_dict = BuySellTrend(small_dataset).run()
 
             # Sorting the trend dict in reverse to get the best relative trends first
-            Sorted_Trend_dict = {k: v for k, v in sorted(Trend_dict.items(), key=lambda item: item[1] , reverse=True)}
+            Sorted_Trend_dict = {k: v  for k, v in sorted(Trend_dict.items(), key=lambda item: item[1] , reverse=True)}
+            Sorted_Trend_dict.pop('NASDAQ')
 
             # Register the date in the portfolio
             Portfolio['Timestamp'] = datetime.datetime.now()
 
             # Current value update/buy/sell all in a loop to evaluate the current price only once since you can't buy and sell on at the same time
-            for company in self.companies_list:
+            for company in Sorted_Trend_dict:
                 symbol_current_value = int(small_dataset.loc[company,:].to_list()[-1]*1000)/1000
-                Portfolio['Shares']['Current_Value'][company] += Portfolio['Shares']['Count'][company] * symbol_current_value
+                Portfolio['Shares']['Current_Value'][company] = Portfolio['Shares']['Count'][company] * symbol_current_value
 
                 # ----- BUYING ------ 
                 if BS_dict[company] == 'Buy' and symbol_current_value > 0:
