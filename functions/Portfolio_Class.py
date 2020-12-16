@@ -77,14 +77,14 @@ class Portfolio_class():
             json.dump(self.portfolio, f)
 
     def value(self, portfolio, dataset):
-        ROI = (portfolio['Money']['Spending Money'] + portfolio['Money']['Savings'] + sum([portfolio['Shares']['Count'][x]*int(dataset.loc[x,:].to_list()[-1]*1000)/1000 for x in companies_list]))/self.initial_investment
+        ROI = (portfolio['Money']['Spending Money'] + portfolio['Money']['Savings'] + sum([portfolio['Shares']['Count'][x]*int(dataset.loc[x,:].to_list()[-1]*1000)/1000 for x in self.companies_list]))/self.initial_investment
 
         Savings = {
             'Total value': ROI *self.initial_investment,
             'ROI': ROI,
             'Spending Money': portfolio['Money']['Spending Money'],
             'Savings': portfolio['Money']['Savings'],
-            'Shares value':sum([portfolio['Shares']['Count'][x]*int(dataset.loc[x,:].to_list()[-1]*1000)/1000 for x in companies_list])
+            'Shares value':sum([portfolio['Shares']['Count'][x]*int(dataset.loc[x,:].to_list()[-1]*1000)/1000 for x in self.companies_list])
         }
 
         #TODO
@@ -112,53 +112,50 @@ class Portfolio_class():
             # Register the date in the portfolio
             Portfolio['Timestamp'] = datetime.datetime.now()
 
-            # ----- BUYING ------ 
+            # Current value update/buy/sell all in a loop to evaluate the current price only once since you can't buy and sell on at the same time
             for company in self.companies_list:
                 symbol_current_value = int(small_dataset.loc[company,:].to_list()[-1]*1000)/1000
+                Portfolio['Shares']['Current_Value'][company] += Portfolio['Shares']['Count'][company] * symbol_current_value
 
-                if BS_dict[company] == 'Buy' and symbol_current_value != 0:
+                # ----- BUYING ------ 
+                if BS_dict[company] == 'Buy' and symbol_current_value > 0:
                     
                     # Buy as much as possible
-                    nb_symbols_to_buy = Portfolio['Money']['Spending Money']*self.ratio_max_investment_per_value//symbol_current_value
-                    buy_value = int(nb_symbols_to_buy*symbol_current_value*1000)/1000
+                    nb_symbols_to_buy = (Portfolio['Money']['Spending Money']*self.ratio_max_investment_per_value)//symbol_current_value
+                    buy_value = nb_symbols_to_buy*symbol_current_value
                     
-                    # Portfolio update
-                    Portfolio['Money']['Spending Money'] -= buy_value
-                    Portfolio['Shares']['Count'][company] += nb_symbols_to_buy
-                    Portfolio['Shares']['Buy_Value'][company] += buy_value
-                    
-                    # Print deal details
-                    if nb_symbols_to_buy >= 1 and self.BS_deals_print:
-                        print(str(int(nb_symbols_to_buy))+' x '+company+' bought at '+str(symbol_current_value)+' ('+str(buy_value)+'$ Total - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'+' - Savings: '+str(int(Portfolio['Money']['Savings']*1000)/1000)+'$')
+                    if nb_symbols_to_buy >=1:
+                        # Portfolio update
+                        Portfolio['Money']['Spending Money'] -= buy_value
+                        Portfolio['Shares']['Count'][company] += nb_symbols_to_buy
+                        Portfolio['Shares']['Buy_Value'][company] += buy_value
+                        
+                        # Print deal details
+                        if self.BS_deals_print:
+                            print(str(nb_symbols_to_buy)+' x '+company+' bought at '+str(symbol_current_value)+' ('+str(buy_value)+'$ Total - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'+' - Savings: '+str(int(Portfolio['Money']['Savings']*1000)/1000)+'$')
 
-            # ----- SELLING ------
-            for company in self.companies_list:
-                symbol_current_value = int(small_dataset.loc[company,:].to_list()[-1]*1000)/1000
+                # ----- SELLING ------
+                nb_symbols_to_sell = Portfolio['Shares']['Count'][company]
 
-                if BS_dict[company] == 'Sell' and Portfolio['Shares']['Count'][company] > 0 and symbol_current_value != 0:
+                if BS_dict[company] == 'Sell' and nb_symbols_to_sell >= 1 and symbol_current_value > 0:
                     # Sell all
-                    nb_symbols_to_sell = Portfolio['Shares']['Count'][company]
-                    sell_value = nb_symbols_to_sell*symbol_current_value
                     
+                    sell_value = nb_symbols_to_sell*symbol_current_value
                     profit = sell_value - Portfolio['Shares']['Buy_Value'][company]
                     
                     # Portfolio update
-                    if profit > 0 and symbol_current_value > 0:
+                    if profit > 0:
                         Portfolio['Money']['Spending Money'] += sell_value*(100-self.transaction_fees_percentage)/100 - profit * self.ratio_of_gain_to_save
                         Portfolio['Money']['Savings'] += profit*self.ratio_of_gain_to_save
                         Portfolio['Shares']['Count'][company] = 0
                         Portfolio['Shares']['Buy_Value'][company] = 0
 
-                        if nb_symbols_to_sell >= 1 and self.BS_deals_print:
-                            print(str(int(nb_symbols_to_sell))+' x '+company+' sold at '+str(symbol_current_value)+' (Profit: '+str(profit)+'$ - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'+' - Savings: '+str(int(Portfolio['Money']['Savings']*1000)/1000)+'$')
+                        if self.BS_deals_print:
+                            print(str(int(nb_symbols_to_sell))+' x '+company+' sold at '+str(symbol_current_value)+' (Profit: '+str(int(profit*1000)/1000)+'$ - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'+' - Savings: '+str(int(Portfolio['Money']['Savings']*1000)/1000)+'$')
 
-            # Current value update
-            for company in self.companies_list:
-                symbol_current_value = int(small_dataset.loc[company,:].to_list()[-1]*1000)/1000
-                Portfolio['Shares']['Current_Value'][company] += Portfolio['Shares']['Count'][company] * symbol_current_value
-
+            
             # Portfolio audit trail creation
-            Savings = self.value(Portfolio, dataset, self.companies_list)
+            Savings = self.value(Portfolio, dataset)
             Portfolio_history.append(Savings)  
 
             self.portfolio = Portfolio  

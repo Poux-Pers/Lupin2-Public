@@ -88,6 +88,7 @@ if __name__ == "__main__":
         list_Cash = []
         list_Savings = []
         list_Shares_value = []
+        Portfolio_history = []
 
         Portfolio = Portfolio_class(Parameters).reset()
         Portfolio, Portfolio_history = Portfolio_class(Parameters).simulation(dataset, Portfolio)
@@ -118,7 +119,7 @@ if __name__ == "__main__":
         axs[2].plot(x_list[:-Parameters['trend_length']], list_ROI)
         plt.show()
 
-        print(Portfolio_history[-1])
+        print(Portfolio_history)
 
 # -------------------- 
 # COMMENTS
@@ -126,9 +127,6 @@ if __name__ == "__main__":
 # TODO
 # Optimisation des paremètre avec affichage graphique
 # Autres fonctions B/S
-# (Further dev) Dashboard d'évolution des fonds avec une simulation 1min = 1 sec (plotly ?) 
-# Listed symbols update - keeping the csv up to date,- managin values that disappear or daily valued
-# _Full feature
 # Deals audit trail - Best deals, worst deals
 # Selling staging values after 5 days or 2 days
 # Combining different B/S algo
@@ -136,3 +134,10 @@ if __name__ == "__main__":
 # Holding shares cost
 # Give parameters in BS functions like selling after high increase
 # If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
+
+# Further TODO
+# Place companies on the map: color countries by medium company price/number of companies
+# Include volume
+# Inclue Companies info
+# (Further dev) Dashboard d'évolution des fonds avec une simulation 1min = 1 sec (plotly ?) 
+# Calculate trend compared to industry trend

@@ -12,6 +12,14 @@ from functions.Dataset_Class import Dataset
 
 
 # -------------------- 
+# LOCAL PARAMETERS
+# -------------------- 
+add_specific_rules = True
+sell_after_stagnation = {'y/n': True, 'nb_days': 4}
+sell_after_high_rise_ratio = 1.5
+
+
+# -------------------- 
 # MAIN
 # -------------------- 
 
@@ -38,6 +46,17 @@ class BuySellTrend():
                 trends_dict[company] = a / np.mean(values_list)
             else:
                 trends_dict[company] = 0
+
+            # Specific rules
+            if add_specific_rules:
+                # Sell after a high rise
+                if values_list[-1] > sell_after_high_rise_ratio * values_list[-2]:
+                    trends_dict[company] = 0
+
+                # Stagnation
+                if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
+                    trends_dict[company] = 0
+
 
         # List of companies without the total ('NASDAQ')
         companies_list = self.df.index[:-1].to_list()
