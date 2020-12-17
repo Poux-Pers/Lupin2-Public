@@ -6,6 +6,7 @@
 import os
 import json
 import datetime
+import numpy as np
 import pandas as pd
 
 from tqdm.auto import tqdm
@@ -92,6 +93,9 @@ class Portfolio_class():
     def simulation(self, dataset, Portfolio):
         # Initialisation
         Portfolio_history = []
+        prediction_dict = {}        
+        sum_prediction_deviation = 0
+        sum_mean_deviation = 0
 
         # Reducin the dataset only to the companies in the list
         dataset = dataset[dataset.index.isin(self.companies_list+['NASDAQ'])]
@@ -104,17 +108,21 @@ class Portfolio_class():
             small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
 
             # Accuracy measurment (R²)
-            if day != 0:
-                sum_prediction_deviation = 0
-
+            if day != self.trend_length:
                 for company in self.companies_list:
-                    sum_prediction_deviation += prediction_dict[company]
+                    #print('Company: ', company)
+                    #print('Prediction: ', prediction_dict[company])
+                    #print('Actual: ', small_dataset.loc[company,:].to_list()[-1])
+                    #print('mean: ', np.mean(small_dataset.loc[company,:].to_list()))
+
+                    sum_prediction_deviation += (prediction_dict[company] - small_dataset.loc[company,:].to_list()[-1])**2
+                    sum_mean_deviation += (np.mean(small_dataset.loc[company,:].to_list()) - small_dataset.loc[company,:].to_list()[-1])**2
 
             # Getting the list of the values to buy and their actual trend
             BS_dict, prediction_dict = BuySellTrend(small_dataset).run()
 
             # Sorting the trend dict in reverse to get the best relative trends first
-            Sorted_Trend_dict = {k: v  for k, v in sorted(Trend_dict.items(), key=lambda item: item[1] , reverse=True)}
+            Sorted_Trend_dict = {k: v  for k, v in sorted(prediction_dict.items(), key=lambda item: item[1] , reverse=True)}
             Sorted_Trend_dict.pop('NASDAQ')
 
             # Register the date in the portfolio
@@ -165,7 +173,9 @@ class Portfolio_class():
             Savings = self.value(Portfolio, small_dataset)
             Portfolio_history.append(Savings)  
 
-            self.portfolio = Portfolio  
+            self.portfolio = Portfolio
+
+        print('----- R²: '+str(int((1-(sum_prediction_deviation/sum_mean_deviation))*1000)/1000)+' -----')
 
         return(Portfolio, Portfolio_history)
 

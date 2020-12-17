@@ -44,7 +44,7 @@ class BuySellTrend():
             a,b = np.polyfit(list_x,values_array,1)
 
             #TODO calculate next value for accuracy 
-            prediction_dict[company] = len(values_list) + 1 * a + b
+            prediction_dict[company] = len(values_list) * a + b
 
             # Calculate relative trend
             if np.mean(values_list) != 0:
