@@ -1,4 +1,12 @@
 # -------------------- 
+# INTRODUCTION
+# -------------------- 
+# Author: Poux Louis
+# Description: TODO
+# Python version: 3.9
+
+
+# -------------------- 
 # IMPORTS
 # -------------------- 
 
@@ -20,6 +28,7 @@ from functions.BuySell_Trend import BuySellTrend
 from functions.Dataset_Class import Dataset
 from functions.ES_interaction import Elasticsearch_class
 from functions.Plot_Class import Plot
+
 
 # -------------------- 
 # PARAMETERS
@@ -61,9 +70,6 @@ full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
 # ----- DATASET ------
 # Reduce the dataset size to the period studied
 dataset = full_hist.new_format(Parameters['study_length'])
-
-# ---- PORTFOLIO  ----
-#Portfolio_class().simulation(dataset, Portfolio, trend_length, companies_list, initial_investment, ratio_of_gain_to_save, ratio_max_investment_per_value, BS_deals_print)
 
 
 if __name__ == "__main__":
@@ -169,7 +175,8 @@ if __name__ == "__main__":
 
         # Sending Portfolio to ES
         i = 0
-        if Parameters['Send_Porfolio_to_ES']:
+        if Parameters['Send_to_ES']:
+            Elasticsearch_class(Parameters).upload_hist()
             for portfolio in tqdm(Portfolio_history_list):
                 i += 1
                 Elasticsearch_class(Parameters).upload_dict(portfolio, i)
@@ -198,7 +205,6 @@ if __name__ == "__main__":
 # Give parameters in BS functions like selling after high increase
 # If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
 # Comparainson to rating agencies
-# Scoring system!!!!!!!
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies

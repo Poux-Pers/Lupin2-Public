@@ -27,3 +27,10 @@ https://www.elastic.co/guide/en/kibana/current/docker.html
 git rm --cached -r Idea
 
 # Add to the info/exclude file their path
+
+# Pipenv
+Pipenv install
+Pipenv shell
+*put in pipfile major librairies*
+Pipenv install --dev or pipenv install
+Pipenv update *maj du lock avec le pipfile

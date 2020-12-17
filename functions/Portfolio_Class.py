@@ -177,12 +177,12 @@ class Portfolio_class():
             
             # Portfolio audit trail creation
             Savings = self.value(Portfolio, small_dataset)
-            Portfolio_history.append(Savings)
+            Portfolio_history.append(Portfolio | Savings) # ALERT only in python 3.9
 
             self.portfolio = Portfolio
         
 
-        R2 = np.mean([1 - sum_prediction_deviation[x]/sum_mean_deviation[x] for x in sum_prediction_deviation])
+        R2 = int(np.mean([1 - sum_prediction_deviation[x]/sum_mean_deviation[x] for x in sum_prediction_deviation])*1000)/1000
         
         return(Portfolio, Portfolio_history, R2)
 

@@ -90,6 +90,9 @@ class Elasticsearch_class():
         self.es.indices.refresh(index='hist_'+self.mesh)
 
     def upload_dict(self, my_dict, es_id):
+        # Portfolio enrichment
+        my_dict['id'] = es_id
+
         # Simple loading
         self.es.index(index='portfolio',doc_type='portfolio',body=my_dict, id=str(es_id))
 
