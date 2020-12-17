@@ -17,6 +17,7 @@ from functions.Dataset_Class import Dataset
 add_specific_rules = True
 sell_after_stagnation = {'y/n': True, 'nb_days': 4}
 sell_after_high_rise_ratio = 1.5
+sell_after_high_loss_ratio = 1.5
 
 
 # -------------------- 
@@ -43,7 +44,7 @@ class BuySellTrend():
             a,b = np.polyfit(list_x,values_array,1)
 
             #TODO calculate next value for accuracy 
-            prediction_dict[company] = len(values_list) + 1 * a + b
+            prediction_dict[company] = len(values_list) * a + b
 
             # Calculate relative trend
             if np.mean(values_list) != 0:
@@ -55,6 +56,10 @@ class BuySellTrend():
             if add_specific_rules:
                 # Sell after a high rise
                 if values_list[-1] > sell_after_high_rise_ratio * values_list[-2]:
+                    trends_dict[company] = 0
+
+                # Sell after a high loss
+                if values_list[-1] < values_list[-2]/sell_after_high_loss_ratio:
                     trends_dict[company] = 0
 
                 # Stagnation
