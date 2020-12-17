@@ -103,8 +103,15 @@ class Portfolio_class():
             # Reducing the dataset to the trend period studied and the companies in the companies list
             small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
 
+            # Accuracy measurment (R²)
+            if day != 0:
+                sum_prediction_deviation = 0
+
+                for company in self.companies_list:
+                    sum_prediction_deviation += prediction_dict[company]
+
             # Getting the list of the values to buy and their actual trend
-            BS_dict, Trend_dict = BuySellTrend(small_dataset).run()
+            BS_dict, prediction_dict = BuySellTrend(small_dataset).run()
 
             # Sorting the trend dict in reverse to get the best relative trends first
             Sorted_Trend_dict = {k: v  for k, v in sorted(Trend_dict.items(), key=lambda item: item[1] , reverse=True)}

@@ -189,7 +189,6 @@ if __name__ == "__main__":
 # Optimisation des paremètre avec affichage graphique
 # Autres fonctions B/S
 # Deals audit trail - Best deals, worst deals
-# Selling staging values after 5 days or 2 days
 # Combining different B/S algo
 # Inflation - Bank %
 # Holding shares cost
