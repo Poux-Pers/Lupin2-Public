@@ -18,7 +18,8 @@ from tqdm.auto import tqdm
 from functions.Portfolio_Class import Portfolio_class
 from functions.BuySell_Trend import BuySellTrend
 from functions.Dataset_Class import Dataset
-
+from functions.ES_interaction import Elasticsearch_class
+from functions.Plot_Class import Plot
 
 # -------------------- 
 # PARAMETERS
@@ -68,7 +69,7 @@ dataset = full_hist.new_format(Parameters['study_length'])
 if __name__ == "__main__":
     if Parameters['Optimization_run']:
         Savings= {}
-        for trend_length in tqdm([5, 10, 15]):
+        for trend_length in tqdm([3, 5, 10, 15]):
             Savings[trend_length] = {}
             for ratio_of_gain_to_save in tqdm([0.1, 0.25, 0.5]):
                 Savings[trend_length][ratio_of_gain_to_save] = {}
@@ -82,44 +83,31 @@ if __name__ == "__main__":
                 json.dump(Savings, f)
 
     else:
-        # Initialisation
-        list_Total_Value = []
-        list_ROI = []
-        list_Cash = []
-        list_Savings = []
-        list_Shares_value = []
-        Portfolio_history = []
+        # ------- RUN --------
+        Portfolio = Portfolio_class(Parameters)
+        Portfolio.reset()
+        last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
 
-        Portfolio = Portfolio_class(Parameters).reset()
-        Portfolio, Portfolio_history = Portfolio_class(Parameters).simulation(dataset, Portfolio)
+        # ------- PLOT -------
+        if Parameters['Plot_Graph']:
+            Plot(Parameters).portfolio_history(Portfolio_history_list, dataset)
 
-        # List construction
-        for Savings in Portfolio_history:
-            list_Total_Value.append(Savings['Total value'])
-            list_ROI.append(Savings['ROI'])
-            list_Cash.append(Savings['Spending Money'])
-            list_Savings.append(Savings['Savings'])
-            list_Shares_value.append(Savings['Shares value'])            
-            
-        # Plot savings
-        fig, axs = plt.subplots(3)
-        fig.suptitle('Savings over time')
-
-        x_list = np.arange(0,len(dataset.columns.to_list()),1)
-
-        # Sub plot for the sum of the symbols
-        axs[0].plot(x_list, dataset.iloc[-1].to_list(), 'purple', label='NASDAQ')
+        # Sending Portfolio to ES
+        i = 0
+        if Parameters['Send_Porfolio_to_ES']:
+            for portfolio in tqdm(Portfolio_history_list):
+                i += 1
+                Elasticsearch_class(Parameters).upload_dict(portfolio, i)
         
-        axs[1].plot(x_list[:-Parameters['trend_length']], list_Cash, 'r', label='Cash')
-        axs[1].plot(x_list[:-Parameters['trend_length']], list_Savings, 'b', label='Bank')
-        axs[1].plot(x_list[:-Parameters['trend_length']], list_Total_Value, 'black', label='Total')
-        axs[1].plot(x_list[:-Parameters['trend_length']], list_Shares_value, 'orange', label='Shares Value')
+        # ------- KPI --------
+        # Print last Savings
+        print(Portfolio_history_list[-1])
+        # Print relative ROI
+        print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
-        # Sub plot for ROI
-        axs[2].plot(x_list[:-Parameters['trend_length']], list_ROI)
-        plt.show()
-
-        print(Portfolio_history)
+        # Last show
+        if Parameters['Plot_Graph']:
+            plt.show()
 
 # -------------------- 
 # COMMENTS
@@ -134,10 +122,12 @@ if __name__ == "__main__":
 # Holding shares cost
 # Give parameters in BS functions like selling after high increase
 # If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
+# Comparainson to rating agencies
+# Scoring system!!!!!!!
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
 # Include volume
 # Inclue Companies info
 # (Further dev) Dashboard d'évolution des fonds avec une simulation 1min = 1 sec (plotly ?) 
-# Calculate trend compared to industry trend
+# Calculate trend compared to industry trend²

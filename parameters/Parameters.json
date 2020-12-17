@@ -1,15 +1,17 @@
 {
-    "Update_Values": true,
+    "Update_Values": false,
     "Mesh": "1d",
-    "trend_length": 5,
-    "study_length": 8,
+    "trend_length": 10,
+    "study_length": 500,
     "initial_investment": 5000,
     "transaction_fees_percentage": 0.1,
     "ratio_of_gain_to_save": 0.1,
     "ratio_max_investment_per_value": 0.25,
-    "BS_deals_print": true,
+    "BS_deals_print": false,
     "Optimization_run": false,
     "Companies_list_path": "\\resources\\NASDAQ_Companies_List.csv",
-    "hist_path":"\\resources\\full_NASDAQ_history.csv"
+    "hist_path":"\\resources\\full_NASDAQ_history.csv",
+    "Send_Porfolio_to_ES": false,
+    "Plot_Graph":true
   }
   

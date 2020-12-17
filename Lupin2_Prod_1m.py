@@ -83,7 +83,7 @@ while True:
     dataset = full_hist.new_format(Parameters['trend_length'] + 1)
     
     # Portfolio calculation
-    Portfolio.simulation(dataset, Portfolio.portfolio, companies_list)
+    Portfolio.simulation(dataset, Portfolio.portfolio)
     #Portfolio.save()
     
     # Update the Json file - indexed since the begining

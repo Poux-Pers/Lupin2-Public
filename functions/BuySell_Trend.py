@@ -31,6 +31,7 @@ class BuySellTrend():
     def run(self):
         # Creation of the dictionary to calculate trends
         trends_dict = {}
+        prediction_dict = {}
 
         # Trends dictionary filling
         for company in self.df.index:
@@ -40,6 +41,9 @@ class BuySellTrend():
             list_x = np.arange(0,len(values_list))
             values_array = np.array(values_list)
             a,b = np.polyfit(list_x,values_array,1)
+
+            #TODO calculate next value for accuracy 
+            prediction_dict[company] = len(values_list) + 1 * a + b
 
             # Calculate relative trend
             if np.mean(values_list) != 0:
@@ -76,11 +80,12 @@ class BuySellTrend():
             if trend > 0 and trend/general_trend >= 1:
                 BS_dict[company] = "Buy"
                 Trend_dict[company] = trend
+
             else:
                 BS_dict[company] = "Sell"
                 Trend_dict[company] = trend
         
-        return(BS_dict, Trend_dict)
+        return(BS_dict, prediction_dict)
 
 if __name__ == "__main__":
     study_length = 10
