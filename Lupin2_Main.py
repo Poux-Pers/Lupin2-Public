@@ -19,7 +19,7 @@ from functions.Portfolio_Class import Portfolio_class
 from functions.BuySell_Trend import BuySellTrend
 from functions.Dataset_Class import Dataset
 from functions.ES_interaction import Elasticsearch_class
-
+from functions.Plot_Class import Plot
 
 # -------------------- 
 # PARAMETERS
@@ -69,7 +69,7 @@ dataset = full_hist.new_format(Parameters['study_length'])
 if __name__ == "__main__":
     if Parameters['Optimization_run']:
         Savings= {}
-        for trend_length in tqdm([5, 10, 15]):
+        for trend_length in tqdm([3, 5, 10, 15]):
             Savings[trend_length] = {}
             for ratio_of_gain_to_save in tqdm([0.1, 0.25, 0.5]):
                 Savings[trend_length][ratio_of_gain_to_save] = {}
@@ -83,53 +83,31 @@ if __name__ == "__main__":
                 json.dump(Savings, f)
 
     else:
-        # Initialisation
-        list_Total_Value = []
-        list_ROI = []
-        list_Cash = []
-        list_Savings = []
-        list_Shares_value = []
-        Portfolio_history = []
-
+        # ------- RUN --------
         Portfolio = Portfolio_class(Parameters)
         Portfolio.reset()
-        last_portfolio, Portfolio_history = Portfolio.simulation(dataset, Portfolio.portfolio)
+        last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
 
-        # List construction
-        for Savings in Portfolio_history:
-            list_Total_Value.append(Savings['Total value'])
-            list_ROI.append(Savings['ROI'])
-            list_Cash.append(Savings['Spending Money'])
-            list_Savings.append(Savings['Savings'])
-            list_Shares_value.append(Savings['Shares value'])            
-            
-        # Plot savings
-        fig, axs = plt.subplots(3)
-        fig.suptitle('Savings over time')
-
-        x_list = dataset.columns.to_list()[Parameters['trend_length']:]
-
-        # Sub plot for the sum of the symbols
-        axs[0].plot(x_list, dataset.iloc[-1].to_list()[Parameters['trend_length']:], 'purple', label='NASDAQ')
-        
-        axs[1].plot(x_list, list_Cash, 'r', label='Cash')
-        axs[1].plot(x_list, list_Savings, 'b', label='Bank')
-        axs[1].plot(x_list, list_Total_Value, 'black', label='Total')
-        axs[1].plot(x_list, list_Shares_value, 'orange', label='Shares Value')
-
-        # Sub plot for ROI
-        axs[2].plot(x_list, list_ROI)
-        plt.show(block = False)
+        # ------- PLOT -------
+        if Parameters['Plot_Graph']:
+            Plot(Parameters).portfolio_history(Portfolio_history_list, dataset)
 
         # Sending Portfolio to ES
         i = 0
         if Parameters['Send_Porfolio_to_ES']:
-            for portfolio in tqdm(Portfolio_history):
+            for portfolio in tqdm(Portfolio_history_list):
                 i += 1
                 Elasticsearch_class(Parameters).upload_dict(portfolio, i)
         
-        print(Portfolio_history[-1])
-        plt.show()
+        # ------- KPI --------
+        # Print last Savings
+        print(Portfolio_history_list[-1])
+        # Print relative ROI
+        print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+
+        # Last show
+        if Parameters['Plot_Graph']:
+            plt.show()
 
 # -------------------- 
 # COMMENTS
