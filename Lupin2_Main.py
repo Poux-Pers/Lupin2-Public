@@ -68,19 +68,69 @@ dataset = full_hist.new_format(Parameters['study_length'])
 
 if __name__ == "__main__":
     if Parameters['Optimization_run']:
-        Savings= {}
-        for trend_length in tqdm([3, 5, 10, 15]):
-            Savings[trend_length] = {}
-            for ratio_of_gain_to_save in tqdm([0.1, 0.25, 0.5]):
-                Savings[trend_length][ratio_of_gain_to_save] = {}
-                for ratio_max_investment_per_value in tqdm([0.01, 0.1, 0.25, 0.5]):
-                    Portfolio = Portfolio_class(Parameters).reset(Parameters['initial_investment'])
-                    Portfolio, Portfolio_history = Portfolio_class().simulation(dataset, Portfolio)
+        # Initialization
+        trend_length_list = [2, 3, 4, 5, 8, 10, 12, 15]
+        trend_length_relative_ROI_list = []
+        ratio_of_gain_to_save_list = [0.01, 0.05, 0.1, 0.25, 0.5, 0.75]
+        ratio_of_gain_to_save_relative_ROI_list = []        
+        ratio_max_investment_per_value_list = [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9]
+        ratio_max_investment_per_value_relative_ROI_list = []
 
-                    Savings[trend_length][ratio_of_gain_to_save][ratio_max_investment_per_value] = Portfolio_class(Parameters).value(Portfolio, dataset)
-        
-            with open(os.getcwd() + '\\resources\\Savings.json', 'w') as f:
-                json.dump(Savings, f)
+        fig, axs = plt.subplots(3)
+        fig.suptitle('Optimization run')        
+
+        # Optimizatrion run will study different parameters separately to save time
+        # Trend length
+        for trend_length in tqdm(trend_length_list):
+            Parameters['trend_length'] = trend_length
+            dataset = full_hist.new_format(Parameters['study_length'])
+            Portfolio = Portfolio_class(Parameters)
+            Portfolio.reset()
+            Portfolio_history_list = []
+            last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+            trend_length_relative_ROI_list.append(str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000))
+
+        # Sub plot 
+        axs[0].plot(trend_length_list, trend_length_relative_ROI_list, label='Trend length - Relative ROI')
+
+        # Putting back the original parameter
+        Parameters['trend_length'] = 5
+        dataset = full_hist.new_format(Parameters['study_length'])
+
+        # 
+        for ratio_of_gain_to_save in tqdm(ratio_of_gain_to_save_list):
+            Parameters['ratio_of_gain_to_save'] = ratio_of_gain_to_save
+            Portfolio = Portfolio_class(Parameters)
+            Portfolio.reset()
+            Portfolio_history_list = []
+            last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+            ratio_of_gain_to_save_relative_ROI_list.append(str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000))
+
+        # Sub plot
+        axs[1].plot(ratio_of_gain_to_save_list, ratio_of_gain_to_save_relative_ROI_list, label='ratio_of_gain_to_save - Relative ROI')
+
+        # Putting back the original parameter
+        Parameters['ratio_of_gain_to_save'] = 0.1
+
+        #
+        for ratio_max_investment_per_value in tqdm(ratio_max_investment_per_value_list):
+            Parameters['ratio_max_investment_per_value'] = ratio_max_investment_per_value
+            Portfolio = Portfolio_class(Parameters)
+            Portfolio.reset()
+            Portfolio_history_list = []
+            last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+            ratio_max_investment_per_value_relative_ROI_list.append(str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000))
+
+        # Sub plot
+        axs[2].plot(ratio_max_investment_per_value_list, ratio_max_investment_per_value_relative_ROI_list, label='ratio_of_gain_to_save - Relative ROI')
+
+        # Putting back the original parameter
+        Parameters['ratio_max_investment_per_value'] = 0.25
+
+        plt.show()
 
     else:
         # ------- RUN --------
