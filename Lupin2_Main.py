@@ -89,7 +89,8 @@ if __name__ == "__main__":
             Portfolio_history_list = []
             last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
 
-            trend_length_relative_ROI_list.append(str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000))
+            trend_length_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
+            #TODO Accuracy list
 
         # Sub plot 
         axs[0].plot(trend_length_list, trend_length_relative_ROI_list, label='Trend length - Relative ROI')
@@ -106,7 +107,7 @@ if __name__ == "__main__":
             Portfolio_history_list = []
             last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
 
-            ratio_of_gain_to_save_relative_ROI_list.append(str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000))
+            ratio_of_gain_to_save_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
 
         # Sub plot
         axs[1].plot(ratio_of_gain_to_save_list, ratio_of_gain_to_save_relative_ROI_list, label='ratio_of_gain_to_save - Relative ROI')
@@ -122,8 +123,8 @@ if __name__ == "__main__":
             Portfolio_history_list = []
             last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
 
-            ratio_max_investment_per_value_relative_ROI_list.append(str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000))
-
+            ratio_max_investment_per_value_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
+            
         # Sub plot
         axs[2].plot(ratio_max_investment_per_value_list, ratio_max_investment_per_value_relative_ROI_list, label='ratio_of_gain_to_save - Relative ROI')
 
