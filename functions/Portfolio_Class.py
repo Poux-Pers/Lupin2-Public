@@ -94,8 +94,14 @@ class Portfolio_class():
         # Initialisation
         Portfolio_history = []
         prediction_dict = {}        
-        sum_prediction_deviation = 0
-        sum_mean_deviation = 0
+        sum_prediction_deviation = {}
+        sum_mean_deviation = {}
+        list_R2 = []
+
+        # Dict initialization
+        for company in self.companies_list:
+            sum_prediction_deviation[company] = 0
+            sum_mean_deviation[company] = 0
 
         # Reducin the dataset only to the companies in the list
         dataset = dataset[dataset.index.isin(self.companies_list+['NASDAQ'])]
@@ -115,8 +121,8 @@ class Portfolio_class():
                     #print('Actual: ', small_dataset.loc[company,:].to_list()[-1])
                     #print('mean: ', np.mean(small_dataset.loc[company,:].to_list()))
 
-                    sum_prediction_deviation += (prediction_dict[company] - small_dataset.loc[company,:].to_list()[-1])**2
-                    sum_mean_deviation += (np.mean(small_dataset.loc[company,:].to_list()) - small_dataset.loc[company,:].to_list()[-1])**2
+                    sum_prediction_deviation[company] += (prediction_dict[company] - small_dataset.loc[company,:].to_list()[-1])**2
+                    sum_mean_deviation[company] += (np.mean(small_dataset.loc[company,:].to_list()) - small_dataset.loc[company,:].to_list()[-1])**2
 
             # Getting the list of the values to buy and their actual trend
             BS_dict, prediction_dict = BuySellTrend(small_dataset).run()
@@ -148,7 +154,7 @@ class Portfolio_class():
                         
                         # Print deal details
                         if self.BS_deals_print:
-                            print(str(int(nb_symbols_to_buy))+' x '+company+' bought at '+str(symbol_current_value)+' ('+str(buy_value)+'$ Total - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'+' - Savings: '+str(int(Portfolio['Money']['Savings']*1000)/1000)+'$')
+                            print(str(int(nb_symbols_to_buy))+' x '+company+'\x1b[1;32;40'+' bought '+'\x1b[0m'+'at '+str(symbol_current_value)+' ('+str(buy_value)+'$ Total - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$')
 
                 # ----- SELLING ------
                 nb_symbols_to_sell = int(Portfolio['Shares']['Count'][company])
@@ -167,17 +173,18 @@ class Portfolio_class():
                         Portfolio['Shares']['Buy_Value'][company] = 0
 
                         if self.BS_deals_print:
-                            print(str(int(nb_symbols_to_sell))+' x '+company+' sold at '+str(symbol_current_value)+' (Profit: '+str(int(profit*1000)/1000)+'$ - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'+' - Savings: '+str(int(Portfolio['Money']['Savings']*1000)/1000)+'$')
+                            print(str(int(nb_symbols_to_sell))+' x '+company+'\x1b[1;31;40'+' sold '+'\x1b[0m'+'at '+str(symbol_current_value)+' (Profit: '+'\x1b[3;30;43'+str(int(profit*1000)/1000)+'$ '+'\x1b[0m'+'- Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$')
             
             # Portfolio audit trail creation
             Savings = self.value(Portfolio, small_dataset)
-            Portfolio_history.append(Savings)  
+            Portfolio_history.append(Savings)
 
             self.portfolio = Portfolio
+        
 
-        print('----- R²: '+str(int((1-(sum_prediction_deviation/sum_mean_deviation))*1000)/1000)+' -----')
-
-        return(Portfolio, Portfolio_history)
+        R2 = np.mean([1 - sum_prediction_deviation[x]/sum_mean_deviation[x] for x in sum_prediction_deviation])
+        
+        return(Portfolio, Portfolio_history, R2)
 
 
 if __name__ == "__main__":

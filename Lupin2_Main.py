@@ -71,6 +71,7 @@ if __name__ == "__main__":
         # Initialization
         trend_length_list = [2, 3, 4, 5, 8, 10, 12, 15]
         trend_length_relative_ROI_list = []
+        trend_length_R2_list = []
         ratio_of_gain_to_save_list = [0.01, 0.05, 0.1, 0.25, 0.5, 0.75]
         ratio_of_gain_to_save_relative_ROI_list = []        
         ratio_max_investment_per_value_list = [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9]
@@ -78,7 +79,7 @@ if __name__ == "__main__":
         initial_investment_list = [5*10**i for i in range(2,6)]
         initial_investment_relative_ROI_list = []
 
-        fig, axs = plt.subplots(4)
+        fig, axs = plt.subplots(5)
         fig.suptitle('Optimization run')        
 
         # Optimizatrion run will study different parameters separately to save time
@@ -89,13 +90,14 @@ if __name__ == "__main__":
             Portfolio = Portfolio_class(Parameters)
             Portfolio.reset()
             Portfolio_history_list = []
-            last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
+            last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
             trend_length_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
-            #TODO Accuracy list
+            trend_length_R2_list.append(R2)
 
         # Sub plot 
         axs[0].plot(trend_length_list, trend_length_relative_ROI_list, label='Trend length - Relative ROI')
+        axs[1].plot(trend_length_list, trend_length_R2_list, 'r', label='Trend length - R2')
 
         # Putting back the original parameter
         Parameters['trend_length'] = 5
@@ -107,12 +109,12 @@ if __name__ == "__main__":
             Portfolio = Portfolio_class(Parameters)
             Portfolio.reset()
             Portfolio_history_list = []
-            last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
+            last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
             ratio_of_gain_to_save_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
 
         # Sub plot
-        axs[1].plot(ratio_of_gain_to_save_list, ratio_of_gain_to_save_relative_ROI_list, label='ratio_of_gain_to_save - Relative ROI')
+        axs[2].plot(ratio_of_gain_to_save_list, ratio_of_gain_to_save_relative_ROI_list, label='ratio_of_gain_to_save - Relative ROI')
 
         # Putting back the original parameter
         Parameters['ratio_of_gain_to_save'] = 0.1
@@ -123,12 +125,12 @@ if __name__ == "__main__":
             Portfolio = Portfolio_class(Parameters)
             Portfolio.reset()
             Portfolio_history_list = []
-            last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
+            last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
             ratio_max_investment_per_value_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
 
         # Sub plot
-        axs[2].plot(ratio_max_investment_per_value_list, ratio_max_investment_per_value_relative_ROI_list, label='ratio_of_gain_to_save - Relative ROI')
+        axs[3].plot(ratio_max_investment_per_value_list, ratio_max_investment_per_value_relative_ROI_list, label='ratio_max_investment_per_value - Relative ROI')
 
         # Putting back the original parameter
         Parameters['ratio_max_investment_per_value'] = 0.25
@@ -139,12 +141,12 @@ if __name__ == "__main__":
             Portfolio = Portfolio_class(Parameters)
             Portfolio.reset()
             Portfolio_history_list = []
-            last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
+            last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
             initial_investment_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
 
         # Sub plot
-        axs[3].plot(initial_investment_list, initial_investment_relative_ROI_list, label='ratio_of_gain_to_save - Relative ROI')
+        axs[4].plot(initial_investment_list, initial_investment_relative_ROI_list, label='initial_investment - Relative ROI')
 
         # Putting back the original parameter
         Parameters['initial_investment'] = 5000
@@ -159,7 +161,7 @@ if __name__ == "__main__":
         # ------- RUN --------
         Portfolio = Portfolio_class(Parameters)
         Portfolio.reset()
-        last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
+        last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
         # ------- PLOT -------
         if Parameters['Plot_Graph']:
@@ -177,6 +179,7 @@ if __name__ == "__main__":
         print(Portfolio_history_list[-1])
         # Print relative ROI
         print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+        print('----- Average R²: '+str(R2)+' -----')
 
         # Last show
         if Parameters['Plot_Graph']:
