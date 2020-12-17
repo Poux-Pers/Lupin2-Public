@@ -31,7 +31,7 @@ class Plot():
             self.list_Shares_value.append(Savings['Shares value'])            
             
         # Plot savings
-        fig, axs = plt.subplots(3, 1, sharey='col')
+        fig, axs = plt.subplots(3, 1)
         fig.suptitle('Savings over time')
 
         x_list = dataset.columns.to_list()[self.Parameters['trend_length']:]

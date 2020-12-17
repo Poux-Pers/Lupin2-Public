@@ -75,8 +75,10 @@ if __name__ == "__main__":
         ratio_of_gain_to_save_relative_ROI_list = []        
         ratio_max_investment_per_value_list = [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9]
         ratio_max_investment_per_value_relative_ROI_list = []
+        initial_investment_list = [5*10**i for i in range(2,6)]
+        initial_investment_relative_ROI_list = []
 
-        fig, axs = plt.subplots(3)
+        fig, axs = plt.subplots(4)
         fig.suptitle('Optimization run')        
 
         # Optimizatrion run will study different parameters separately to save time
@@ -124,14 +126,34 @@ if __name__ == "__main__":
             last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
 
             ratio_max_investment_per_value_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
-            
+
         # Sub plot
         axs[2].plot(ratio_max_investment_per_value_list, ratio_max_investment_per_value_relative_ROI_list, label='ratio_of_gain_to_save - Relative ROI')
 
         # Putting back the original parameter
         Parameters['ratio_max_investment_per_value'] = 0.25
 
+        #
+        for initial_investment in tqdm(initial_investment_list):
+            Parameters['initial_investment'] = initial_investment
+            Portfolio = Portfolio_class(Parameters)
+            Portfolio.reset()
+            Portfolio_history_list = []
+            last_portfolio, Portfolio_history_list = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+            initial_investment_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
+
+        # Sub plot
+        axs[3].plot(initial_investment_list, initial_investment_relative_ROI_list, label='ratio_of_gain_to_save - Relative ROI')
+
+        # Putting back the original parameter
+        Parameters['initial_investment'] = 5000
+
         plt.show()
+        
+
+
+        initial_investment
 
     else:
         # ------- RUN --------

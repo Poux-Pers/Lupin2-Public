@@ -87,9 +87,6 @@ class Portfolio_class():
             'Shares value':sum([portfolio['Shares']['Count'][x]*int(dataset.loc[x,:].to_list()[-1]*1000)/1000 for x in self.companies_list])
         }
 
-        #TODO
-        # Add relative ROI (ROI / NASDAQ evolution)
-
         return(Savings)
 
     def simulation(self, dataset, Portfolio):
