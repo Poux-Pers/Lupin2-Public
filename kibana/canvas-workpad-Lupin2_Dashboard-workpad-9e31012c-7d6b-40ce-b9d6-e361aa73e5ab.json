@@ -1,0 +1,133 @@
+{
+  "css": ".canvasPage {\n\n}",
+  "variables": [],
+  "id": "workpad-9e31012c-7d6b-40ce-b9d6-e361aa73e5ab",
+  "name": "Lupin2_Dashboard",
+  "width": 1450,
+  "height": 720,
+  "page": 0,
+  "pages": [
+    {
+      "id": "page-c0b17791-b237-4eb4-b1c4-ca1f383f7644",
+      "style": { "background": "#000000" },
+      "transition": {},
+      "elements": [
+        {
+          "id": "element-2e666369-2bd8-4157-b4a1-60d88a882bfa",
+          "position": {
+            "left": 20,
+            "top": 7,
+            "width": 906,
+            "height": 244,
+            "angle": 0,
+            "parent": null
+          },
+          "expression": "savedVisualization id=\"9cb0b720-408f-11eb-9bc2-f94910ec7428\" timerange={timerange from=\"now-15w\" to=\"now\"}\n| render",
+          "filter": null
+        },
+        {
+          "id": "element-98f52435-b19a-4f7d-99e9-e59e0c91a042",
+          "position": {
+            "left": 513,
+            "top": 278,
+            "width": 413,
+            "height": 185,
+            "angle": 0,
+            "parent": null
+          },
+          "expression": "savedVisualization id=\"e123cc20-4090-11eb-9bc2-f94910ec7428\" timerange={timerange from=\"now-15w\" to=\"now+1d\"}\n| render",
+          "filter": null
+        },
+        {
+          "id": "element-d38f1e07-8296-466f-a803-08e3b62ada73",
+          "position": {
+            "left": 961,
+            "top": 7,
+            "width": 480,
+            "height": 698,
+            "angle": 0,
+            "parent": null
+          },
+          "expression": "savedVisualization id=\"b85559a0-4098-11eb-9bc2-f94910ec7428\" timerange={timerange from=\"now-15w\" to=\"now\"}\n| render",
+          "filter": null
+        },
+        {
+          "id": "element-9a5db739-f223-4148-b3ed-58715a54b89e",
+          "position": {
+            "left": 20,
+            "top": 278,
+            "width": 439,
+            "height": 207,
+            "angle": 0,
+            "parent": null
+          },
+          "expression": "savedVisualization id=\"2770f0f0-4095-11eb-9bc2-f94910ec7428\" timerange={timerange from=\"now-15w\" to=\"now\"}\n| render",
+          "filter": null
+        },
+        {
+          "id": "element-d8029d59-f3ba-43e1-825a-731d4efa965f",
+          "position": {
+            "left": 20,
+            "top": 490,
+            "width": 439,
+            "height": 215,
+            "angle": 0,
+            "parent": null
+          },
+          "expression": "savedVisualization id=\"768d5340-414e-11eb-9c3d-777f33ca9c2b\" timerange={timerange from=\"now-15w\" to=\"now\"}\n| render",
+          "filter": null
+        },
+        {
+          "id": "element-3d84d98a-8d9f-466a-95e6-be349fdada45",
+          "position": {
+            "left": 499,
+            "top": 490,
+            "width": 427,
+            "height": 215,
+            "angle": 0,
+            "parent": null
+          },
+          "expression": "savedVisualization id=\"51bbe6b0-4150-11eb-9c3d-777f33ca9c2b\" timerange={timerange from=\"now-15w\" to=\"now\"} colors={seriesStyle label=\"Savings\" color=\"#58140C\"}\n| render",
+          "filter": null
+        }
+      ],
+      "groups": []
+    }
+  ],
+  "colors": [
+    "#37988d",
+    "#c19628",
+    "#b83c6f",
+    "#3f9939",
+    "#1785b0",
+    "#ca5f35",
+    "#45bdb0",
+    "#f2bc33",
+    "#e74b8b",
+    "#4fbf48",
+    "#1ea6dc",
+    "#fd7643",
+    "#72cec3",
+    "#f5cc5d",
+    "#ec77a8",
+    "#7acf74",
+    "#4cbce4",
+    "#fd986f",
+    "#a1ded7",
+    "#f8dd91",
+    "#f2a4c5",
+    "#a6dfa2",
+    "#86d2ed",
+    "#fdba9f",
+    "#000000",
+    "#444444",
+    "#777777",
+    "#BBBBBB",
+    "#FFFFFF",
+    "rgba(255,255,255,0)"
+  ],
+  "isWriteable": true,
+  "assets": {},
+  "@timestamp": "2020-12-18T17:06:44.256Z",
+  "@created": "2020-12-18T16:45:34.654Z"
+}

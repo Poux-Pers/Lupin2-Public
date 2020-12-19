@@ -202,9 +202,9 @@ if __name__ == "__main__":
 # Combining different B/S algo
 # Inflation - Bank %
 # Holding shares cost
-# Give parameters in BS functions like selling after high increase
 # If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
 # Comparainson to rating agencies
+# save B/S dict 
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
