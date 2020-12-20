@@ -145,7 +145,28 @@ class Dataset():
         dataset = TCD[TCD.columns[-study_length:]]
 
         return(dataset)
-            
+
+    def create_ML_dataset(self):
+        ML_dataset = pd.DataFrame([])
+        # TODO Create a dataset with, ast feature, les last "Trend length value", " Company name", "Industry"
+        return(ML_dataset)
+
+    def enrich_symbol(self, info_to_gather_list):
+        # Initialization
+        enriched_dict = {}
+        
+        # Get info for each symbol of the list
+        for symbol in tqdm(self.companies_list):
+            enriched_dict[symbol] = []
+            full_info = yf.Ticker(symbol).info
+
+            for info in info_to_gather_list:
+                enriched_dict[symbol].append(full_info[info])
+
+        # Transform it into a dataframe
+        enriched_df = pd.DataFrame.from_dict(enriched_dict, orient='index', columns=info_to_gather_list)
+
+        return(enriched_df)
 
 if __name__ == "__main__":
     # Test lines, executed only when the file is executed as main
@@ -162,3 +183,5 @@ if __name__ == "__main__":
 
     dataset = full_hist.new_format(10)
     print(dataset)
+
+    print(full_hist.enrich_symbol(['sector', 'country', 'shortName']))

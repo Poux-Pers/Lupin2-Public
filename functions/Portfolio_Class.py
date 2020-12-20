@@ -40,6 +40,7 @@ class Portfolio_class():
         self.BS_deals_print = Parameters['BS_deals_print']
         self.transaction_fees_percentage = Parameters['transaction_fees_percentage']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
+        self.models_to_use = Parameters['Models_to_use']
 
     def create(self):
         # This function will create a portfolio structure if it doesn't already exists
@@ -129,8 +130,8 @@ class Portfolio_class():
                     sum_mean_deviation[company] += (np.mean(small_dataset.loc[company,:].to_list()) - small_dataset.loc[company,:].to_list()[-1])**2
 
             # Getting the list of the values to buy and their prediction
-            for model in Parameters['Models_to_use']:
-                if Parameters['Models_to_use'][model]:
+            for model in self.models_to_use:
+                if self.models_to_use[model]:
                     BS_dict, prediction_dict = eval('BuySell(small_dataset).'+model+'()')
 
                     # Add the results to the lists if we want to combine some models

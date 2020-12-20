@@ -72,9 +72,42 @@ full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
 dataset = full_hist.new_format(Parameters['study_length'])
 
 # ------- RUN --------
-for 
+# Trend
+# Reset other models
+for model in Parameters['Models_to_use']:
+    Parameters['Models_to_use'][model] = False
+
+Parameters['Models_to_use']['trend'] = True
 Portfolio = Portfolio_class(Parameters)
 Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
+print('----- Trend -----')
+print('----- Average R²: '+str(R2)+' -----')
+
+# Graduated wheights
+# Reset other models
+for model in Parameters['Models_to_use']:
+    Parameters['Models_to_use'][model] = False
+
+Parameters['Models_to_use']['graduated_weights'] = True
+Portfolio = Portfolio_class(Parameters)
+Portfolio.reset()
+last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+print('----- Graduated wheights -----')
+print('----- Average R²: '+str(R2)+' -----')
+
+# Trend + Graduated wheights
+# Reset other models
+for model in Parameters['Models_to_use']:
+    Parameters['Models_to_use'][model] = False
+
+Parameters['Models_to_use']['trend'] = True
+Parameters['Models_to_use']['graduated_weights'] = True
+Portfolio = Portfolio_class(Parameters)
+Portfolio.reset()
+last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+print('----- Trend + Graduated wheights -----')
 print('----- Average R²: '+str(R2)+' -----')

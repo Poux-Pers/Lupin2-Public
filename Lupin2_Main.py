@@ -198,7 +198,6 @@ if __name__ == "__main__":
 # TODO
 # Optimisation des paremètre avec affichage graphique
 # Deals audit trail - Best deals, worst deals
-# Combining different B/S algo
 # Inflation - Bank %
 # Holding shares cost
 # If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
@@ -206,12 +205,13 @@ if __name__ == "__main__":
 # make a method for special tests
 # save B/S dict 
 # Autres fonctions B/S
-# - 1/2^n evec N la distance à la prochaine valeur
-#
+# - Zig zag
+# - Trend identification
+# For all ML models, create a dataset based on the parameters trend length and available info (trend, name), predict 1 day, do not change the set until the parameters are changed, as well for the saved  
+# World map witrh average price
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
 # Include volume
-# Inclue Companies info
 # (Further dev) Dashboard d'évolution des fonds avec une simulation 1min = 1 sec (plotly ?) 
 # Calculate trend compared to industry trend²

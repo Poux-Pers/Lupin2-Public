@@ -11,6 +11,9 @@ from tqdm.auto import tqdm
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
+# ---- FUNCTIONS -----
+from functions.Dataset_Class import Dataset
+
 
 # -------------------- 
 # PARAMETERS
@@ -33,10 +36,16 @@ class Elasticsearch_class():
         self.hist_path = Parameters['hist_path']
         self.date_name = ''
         self.json = {}
+        self.parameters = Parameters
 
     def upload_hist(self):
+        # Clean index
+        self.es.indices.delete(index='hist_'+self.mesh, ignore=[400, 404])
+
         # Create index
-        #self.es.indices.create(index='hist_'+self.mesh,body={})
+        self.es.indices.create(index='hist_'+self.mesh,body={})
+
+        
 
         # TODO Only add what is not already on ES
 
@@ -63,8 +72,13 @@ class Elasticsearch_class():
             self.dict[str(column)] = self.hist[column]
 
         # Bulk loading
-
         df = pd.DataFrame(self.dict)
+
+        # Adding info - BE CAREFUL: Adding any new information requires to recreate the index in kibana
+        #supplement_df = Dataset(self.parameters).enrich_symbol(['sector', 'country', 'shortName'])
+        #supplement_df = supplement_df.reset_index()
+        #df = df.join(supplement_df.set_index('index'), on='Company')
+
         documents = df.to_dict(orient='records')
         bulk(self.es, documents, index='hist_'+self.mesh,doc_type='foo', raise_on_error=True)
 
@@ -90,6 +104,12 @@ class Elasticsearch_class():
         self.es.indices.refresh(index='hist_'+self.mesh)
 
     def upload_dict(self, my_dict, es_id):
+        # Clean index
+        self.es.indices.delete(index='portfolio', ignore=[400, 404])
+
+        # Create index
+        self.es.indices.create(index='portfolio',body={})
+        
         # Portfolio enrichment
         my_dict['id'] = es_id
 
