@@ -1,0 +1,4 @@
+resources/ML_Dataset.csv
+idea/
+.ipynb_checkpoints/
+functions/__pycache__/

@@ -209,7 +209,8 @@ class Portfolio_class():
             
             # Portfolio audit trail creation
             Savings = self.value(Portfolio, small_dataset)
-            Portfolio_history.append(Portfolio | Savings) # ALERT only in python 3.9
+            Portfolio_history.append({**Portfolio, **Savings})
+            #Portfolio_history.append(Portfolio | Savings) # ALERT only in python 3.9
 
             self.portfolio = Portfolio
         

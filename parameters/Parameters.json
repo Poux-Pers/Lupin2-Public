@@ -1,7 +1,7 @@
 {
     "Update_Values": false,
     "Mesh": "1d",
-    "trend_length": 5,
+    "trend_length": 50,
     "study_length": 500,
     "initial_investment": 5000,
     "transaction_fees_percentage": 1,
@@ -11,6 +11,7 @@
     "Optimization_run": false,
     "Companies_list_path": "\\resources\\NASDAQ_Companies_List.csv",
     "hist_path":"\\resources\\full_NASDAQ_history.csv",
+    "ML_dataset_path": "\\resources\\ML_Dataset.csv",
     "Send_to_ES": true,
     "Plot_Graph": true,
     "Models_to_use":{

@@ -7,6 +7,9 @@ name = "pypi"
 elasticsearch = "*"
 yfinance = "*"
 tqdm = "*"
+matplotlib = "*"
+keras = "*"
+tensorflow = "*"
 
 [dev-packages]
 
