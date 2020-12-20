@@ -185,8 +185,11 @@ class Dataset():
         ML_dataset = pd.concat(datasets_lists).dropna()
         #ML_dataset = ML_dataset.join(supplement_df.set_index('index'), on='Company')
 
-        # Remove row with a 0 as value
+        # Remove row with a 0 as value²
         ML_dataset = ML_dataset.loc[ML_dataset.Day_1 > 0]
+
+        # Normalize lines
+        ML_dataset = ML_dataset.div(ML_dataset.max(axis=1)*2, axis=0)
         
         # Save dataframe
         ML_dataset.to_csv(os.getcwd() + self.ML_dataset_path)

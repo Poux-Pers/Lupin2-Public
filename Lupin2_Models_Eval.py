@@ -14,6 +14,7 @@
 import os
 import time
 import json
+import keras
 import datetime
 import math as ma
 import numpy as np
@@ -21,6 +22,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from tqdm.auto import tqdm
+from keras.models import Sequential
+from keras.layers import Dense
 
 # ---- FUNCTIONS -----
 from functions.Portfolio_Class import Portfolio_class
@@ -105,6 +108,19 @@ for model in Parameters['Models_to_use']:
 
 Parameters['Models_to_use']['trend'] = True
 Parameters['Models_to_use']['graduated_weights'] = True
+Portfolio = Portfolio_class(Parameters)
+Portfolio.reset()
+last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+print('----- Trend + Graduated wheights -----')
+print('----- Average R²: '+str(R2)+' -----')
+
+# NN
+# Reset other models
+for model in Parameters['Models_to_use']:
+    Parameters['Models_to_use'][model] = False
+
+Parameters['Models_to_use']['NN'] = True
 Portfolio = Portfolio_class(Parameters)
 Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)

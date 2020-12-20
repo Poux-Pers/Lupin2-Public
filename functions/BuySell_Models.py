@@ -4,8 +4,12 @@
 
 # ---- LIBRARIES -----
 import os
+import keras
 import numpy as np
 import pandas as pd
+
+from keras.models import Sequential
+from keras.layers import Dense
 
 # ---- FUNCTIONS -----
 from functions.Dataset_Class import Dataset
@@ -92,8 +96,7 @@ class BuySell():
         return(BS_dict, prediction_dict)
 
     def graduated_weights(self):
-        # Creation of the dictionary to calculate trends
-        trends_dict = {}
+        # Creation of the dictionary to calculate next values
         prediction_dict = {}
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
@@ -131,7 +134,50 @@ class BuySell():
         
         return(BS_dict, prediction_dict)
 
+    def NN(self):
+        # Creation of the dictionary to calculate next values
+        prediction_dict = {}
+        # Creation of the dictionary to advise Buy or Sell
+        BS_dict = {}
+        # Load model
+        model = keras.models.load_model(os.getcwd()+"\\models\\NN")
 
+        # List of companies without the total ('NASDAQ')
+        companies_list = self.df.index[:-1].to_list()
+
+        # Prediction dictionary filling
+        for company in self.df.index:
+            values_list = self.df.loc[company,:].to_list()
+
+            # Normalize
+            normalizer = max(values_list) * 2
+
+            # calculate next value for accuracy 
+            prediction_dict[company] = model.predict(np.array([[x/normalizer for x in values_list]], dtype=float)) * normalizer
+            #print(values_list, [x/normalizer for x in values_list], prediction_dict[company])
+
+            # Condition to buy or Sell
+            if prediction_dict[company] > values_list[-1]:
+                BS_dict[company] = "Buy"
+
+            else:
+                BS_dict[company] = "Sell"
+
+            # Specific rules
+            if add_specific_rules:
+                # Sell after a high rise
+                if values_list[-1] > sell_after_high_rise_ratio * values_list[-2]:
+                    BS_dict[company] = "Sell"
+
+                # Sell after a high loss
+                if values_list[-1] < values_list[-2]/sell_after_high_loss_ratio:
+                    BS_dict[company] = "Sell"
+
+                # Stagnation
+                if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
+                    BS_dict[company] = "Sell"
+        
+        return(BS_dict, prediction_dict)
 
 if __name__ == "__main__":
     study_length = 10
