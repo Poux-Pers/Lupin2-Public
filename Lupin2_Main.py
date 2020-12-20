@@ -177,6 +177,7 @@ if __name__ == "__main__":
         i = 0
         if Parameters['Send_to_ES']:
             Elasticsearch_class(Parameters).upload_hist()
+            Elasticsearch_class(Parameters).reset_portfolio_index()
             for portfolio in tqdm(Portfolio_history_list):
                 i += 1
                 Elasticsearch_class(Parameters).upload_dict(portfolio, i)
@@ -208,7 +209,7 @@ if __name__ == "__main__":
 # - Zig zag
 # - Trend identification
 # For all ML models, create a dataset based on the parameters trend length and available info (trend, name), predict 1 day, do not change the set until the parameters are changed, as well for the saved  
-# World map witrh average price
+# World map with average price - Need county code 2 digits
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies

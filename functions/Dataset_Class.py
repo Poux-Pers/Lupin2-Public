@@ -53,7 +53,8 @@ class Dataset():
     def __init__(self, Parameters):
         self.mesh = Parameters['Mesh']
         self.hist = pd.DataFrame([])
-        self.hist_path = Parameters['hist_path']
+        self.hist_path = Parameters['hist_path']        
+        self.trend_length = Parameters['trend_length']
         self.date_name = ''
         self.companies_list_path = Parameters['Companies_list_path']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
@@ -72,7 +73,6 @@ class Dataset():
         
         # Date formating
         return(self.hist)
-
 
     def update(self, update_period='max'):
         # Initialization
@@ -119,10 +119,8 @@ class Dataset():
 
         return(self.hist)
 
-
     def save(self):
         self.hist.to_csv(self.path)
-
 
     def new_format(self, study_length):
         # TCD to set date in columns, have a sum of the companies
@@ -146,9 +144,49 @@ class Dataset():
 
         return(dataset)
 
-    def create_ML_dataset(self):
-        ML_dataset = pd.DataFrame([])
-        # TODO Create a dataset with, ast feature, les last "Trend length value", " Company name", "Industry"
+    def create_ML_dataset(self, dataset):
+        datasets_lists = []
+        # Reducin the dataset only to the companies in the list
+        dataset = dataset[dataset.index.isin(self.companies_list)]
+        dataset =dataset.reset_index()
+
+        # Dataset enrichment
+        supplement_df = self.enrich_symbol(['sector', 'country', 'shortName'])
+        supplement_df = supplement_df.reset_index()
+        #dataset = dataset.join(supplement_df.set_index('index'), on='Company')
+        
+        # Visual feedback
+        print('Portfolio simulation in progress')
+
+        # Columns creation
+        columns = ['Company']
+        for i in range(self.trend_length):
+            columns.append('Day '+str(i+1))
+        columns.append('prediction')
+
+        for day in tqdm(range(self.trend_length, len(dataset.columns.to_list())-1)):
+            # Reinitialization
+            BS_dict_list = []
+            prediction_dict_list = []
+
+            # Reducing the dataset to the trend period studied and the companies in the companies list
+            small_dataset = dataset[['Company']+dataset.columns[day-self.trend_length:day+1].to_list()].fillna(0)
+
+            # Rename columns
+            small_dataset.columns = columns
+
+            datasets_lists.append(small_dataset)
+
+        # Add columns
+        columns.append(['sector', 'country', 'shortName'])
+
+        # Enrich the data frame with feature
+        ML_dataset = pd.concat(datasets_lists).dropna()
+        ML_dataset = ML_dataset.join(supplement_df.set_index('index'), on='Company')
+        
+        # Save dataframe
+        ML_dataset.to_csv(os.getcwd()+'\\resources\\ML_Dataset.csv')
+
         return(ML_dataset)
 
     def enrich_symbol(self, info_to_gather_list):
@@ -177,11 +215,14 @@ if __name__ == "__main__":
     else:
         full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].dt.floor('min')
  
-    full_hist.update('7d')
+    #full_hist.update('7d')
     full_hist.save()
     print(full_hist.hist)
 
-    dataset = full_hist.new_format(10)
-    print(dataset)
+    dataset = full_hist.new_format(100000)
 
-    print(full_hist.enrich_symbol(['sector', 'country', 'shortName']))
+    #print(full_hist.enrich_symbol(['sector', 'country', 'shortName']))
+
+    new_hist = full_hist.create_ML_dataset(dataset)
+    new_hist = new_hist.reset_index(drop=True)
+    print(new_hist)

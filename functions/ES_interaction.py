@@ -103,13 +103,7 @@ class Elasticsearch_class():
 
         self.es.indices.refresh(index='hist_'+self.mesh)
 
-    def upload_dict(self, my_dict, es_id):
-        # Clean index
-        self.es.indices.delete(index='portfolio', ignore=[400, 404])
-
-        # Create index
-        self.es.indices.create(index='portfolio',body={})
-        
+    def upload_dict(self, my_dict, es_id):        
         # Portfolio enrichment
         my_dict['id'] = es_id
 
@@ -117,6 +111,13 @@ class Elasticsearch_class():
         self.es.index(index='portfolio',doc_type='portfolio',body=my_dict, id=str(es_id))
 
         self.es.indices.refresh(index='portfolio')
+
+    def reset_portfolio_index(self):        
+        # Clean index
+        self.es.indices.delete(index='portfolio', ignore=[400, 404])
+
+        # Create index
+        self.es.indices.create(index='portfolio',body={})
         
     
 if __name__ == "__main__":
