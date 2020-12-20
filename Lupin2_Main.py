@@ -24,7 +24,7 @@ from tqdm.auto import tqdm
 
 # ---- FUNCTIONS -----
 from functions.Portfolio_Class import Portfolio_class
-from functions.BuySell_Trend import BuySellTrend
+from functions.BuySell_Models import BuySell
 from functions.Dataset_Class import Dataset
 from functions.ES_interaction import Elasticsearch_class
 from functions.Plot_Class import Plot
@@ -197,14 +197,17 @@ if __name__ == "__main__":
 # -------------------- 
 # TODO
 # Optimisation des paremètre avec affichage graphique
-# Autres fonctions B/S
 # Deals audit trail - Best deals, worst deals
 # Combining different B/S algo
 # Inflation - Bank %
 # Holding shares cost
 # If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
 # Comparainson to rating agencies
+# make a method for special tests
 # save B/S dict 
+# Autres fonctions B/S
+# - 1/2^n evec N la distance à la prochaine valeur
+#
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies

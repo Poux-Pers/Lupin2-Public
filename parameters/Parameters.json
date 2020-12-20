@@ -11,7 +11,11 @@
     "Optimization_run": false,
     "Companies_list_path": "\\resources\\NASDAQ_Companies_List.csv",
     "hist_path":"\\resources\\full_NASDAQ_history.csv",
-    "Send_to_ES": true,
-    "Plot_Graph":true
+    "Send_to_ES": false,
+    "Plot_Graph": true,
+    "Models_to_use":{
+      "trend": false,
+      "graduated_weights": true
+    }
   }
   

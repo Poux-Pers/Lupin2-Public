@@ -1,4 +1,12 @@
 # -------------------- 
+# INTRODUCTION
+# -------------------- 
+# Author: Poux Louis
+# Description: TODO
+# Python version: 3.9
+
+
+# -------------------- 
 # IMPORTS
 # -------------------- 
 
@@ -19,6 +27,7 @@ from functions.Portfolio_Class import Portfolio_class
 from functions.BuySell_Models import BuySell
 from functions.Dataset_Class import Dataset
 from functions.ES_interaction import Elasticsearch_class
+from functions.Plot_Class import Plot
 
 
 # -------------------- 
@@ -27,9 +36,6 @@ from functions.ES_interaction import Elasticsearch_class
 
 with open(os.getcwd()+'\\parameters\\Parameters.json', 'r') as json_file:
     Parameters = json.load(json_file)
-
-# Overwrite mesh
-Parameters['Mesh'] = '1m'
 
 
 # -------------------- 
@@ -47,9 +53,8 @@ if full_hist.date_name != '1m':
 else:
     full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].dt.floor('min')
 
-# Create the porfolio
-Portfolio = Portfolio_class(Parameters)
-Portfolio.create()
+# Load the porfolio
+Portfolio = Portfolio_class(Parameters).reset()
 
 # ------ UPDATE ------
 # Fetching Data to complete history
@@ -57,7 +62,7 @@ if Parameters['Update_Values'] == True:
     full_hist.update('7d')
 
 # Update Companies list if needed
-companies_list = full_hist.companies_list
+companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
 
 # Using only the symbols of the company list
 full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
@@ -66,26 +71,10 @@ full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
 # Reduce the dataset size to the period studied
 dataset = full_hist.new_format(Parameters['study_length'])
 
-# Loop initialisation
-t0 = time.time()
-i = 0
+# ------- RUN --------
+for 
+Portfolio = Portfolio_class(Parameters)
+Portfolio.reset()
+last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
-
-while True:
-    print(str(int(time.time()-t0)) + ' seconds to perform a loop')
-    # Reset timer to measure the loop time
-    t0 = time.time()
-
-    full_hist.update('10min')
-    Elasticsearch_class(Parameters).upload_df(full_hist.hist)
-
-    # Reduce the dataset size to the period studied
-    dataset = full_hist.new_format(Parameters['trend_length'] + 1)
-    
-    # Portfolio calculation
-    Portfolio.simulation(dataset, Portfolio.portfolio)
-    #Portfolio.save()
-    
-    # Update the Json file - indexed since the begining
-    i += 1
-    Elasticsearch_class(Parameters).upload_dict(Portfolio.portfolio, i)
+print('----- Average R²: '+str(R2)+' -----')

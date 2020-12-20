@@ -24,12 +24,12 @@ sell_after_high_loss_ratio = 1.5
 # MAIN
 # -------------------- 
 
-class BuySellTrend():
+class BuySell():
 
     def __init__(self, short_hist_dataframe):
         self.df = short_hist_dataframe
 
-    def run(self):
+    def trend(self):
         # Creation of the dictionary to calculate trends
         trends_dict = {}
         prediction_dict = {}
@@ -43,7 +43,7 @@ class BuySellTrend():
             values_array = np.array(values_list)
             a,b = np.polyfit(list_x,values_array,1)
 
-            #TODO calculate next value for accuracy 
+            # Calculate next value for accuracy 
             prediction_dict[company] = len(values_list) * a + b
 
             # Calculate relative trend
@@ -65,7 +65,6 @@ class BuySellTrend():
                 # Stagnation
                 if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
                     trends_dict[company] = 0
-
 
         # List of companies without the total ('NASDAQ')
         companies_list = self.df.index[:-1].to_list()
@@ -92,6 +91,48 @@ class BuySellTrend():
         
         return(BS_dict, prediction_dict)
 
+    def graduated_weights(self):
+        # Creation of the dictionary to calculate trends
+        trends_dict = {}
+        prediction_dict = {}
+        # Creation of the dictionary to advise Buy or Sell
+        BS_dict = {}
+
+        # List of companies without the total ('NASDAQ')
+        companies_list = self.df.index[:-1].to_list()
+
+        # Prediction dictionary filling
+        for company in self.df.index:
+            values_list = self.df.loc[company,:].to_list()
+
+            # calculate next value for accuracy 
+            prediction_dict[company] = sum([values_list[x]/2**(len(values_list)-x) for x in range(len(values_list))])/sum([1/2**(len(values_list)-x) for x in range(len(values_list))])
+
+            # Condition to buy or Sell
+            if prediction_dict[company] > values_list[-1]:
+                BS_dict[company] = "Buy"
+
+            else:
+                BS_dict[company] = "Sell"
+
+            # Specific rules
+            if add_specific_rules:
+                # Sell after a high rise
+                if values_list[-1] > sell_after_high_rise_ratio * values_list[-2]:
+                    BS_dict[company] = "Sell"
+
+                # Sell after a high loss
+                if values_list[-1] < values_list[-2]/sell_after_high_loss_ratio:
+                    BS_dict[company] = "Sell"
+
+                # Stagnation
+                if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
+                    BS_dict[company] = "Sell"
+        
+        return(BS_dict, prediction_dict)
+
+
+
 if __name__ == "__main__":
     study_length = 10
 
@@ -102,6 +143,6 @@ if __name__ == "__main__":
     
     dataset = Dataset(full_hist).new_format(study_length)
 
-    BS_dict, Trend_dict = BuySellTrend(dataset).run()
+    BS_dict, Trend_dict = BuySell(dataset).trend()
     print(BS_dict, Trend_dict)
 
