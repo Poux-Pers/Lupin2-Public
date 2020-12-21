@@ -124,6 +124,21 @@ Portfolio = Portfolio_class(Parameters)
 Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
-print('----- Trend + Graduated wheights -----')
+print('----- NN -----')
+print('----- Average R²: '+str(R2)+' -----')
+print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+
+# NN - Trend
+# Reset other models
+for model in Parameters['Models_to_use']:
+    Parameters['Models_to_use'][model] = False
+
+Parameters['Models_to_use']['NN'] = True
+Parameters['Models_to_use']['trend'] = True
+Portfolio = Portfolio_class(Parameters)
+Portfolio.reset()
+last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+print('----- NN + Trend -----')
 print('----- Average R²: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
