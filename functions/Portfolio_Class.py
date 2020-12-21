@@ -132,7 +132,7 @@ class Portfolio_class():
             # Getting the list of the values to buy and their prediction
             for model in self.models_to_use:
                 if self.models_to_use[model]:
-                    BS_dict, prediction_dict = eval('BuySell(small_dataset).'+model+'()')
+                    BS_dict, prediction_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
 
                     # Add the results to the lists if we want to combine some models
                     BS_dict_list.append(BS_dict)
@@ -156,7 +156,6 @@ class Portfolio_class():
             else:
                 BS_dict = BS_dict_list[0]
                 prediction_dict = prediction_dict_list[0]
-            # TODO BS_dict, prediction_dict = BuySell(small_dataset).trend()
 
             # Sorting the trend dict in reverse to get the best relative trends first
             Sorted_Trend_dict = {k: v  for k, v in sorted(prediction_dict.items(), key=lambda item: item[1] , reverse=True)}

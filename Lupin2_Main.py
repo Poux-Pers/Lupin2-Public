@@ -57,9 +57,9 @@ else:
 Portfolio = Portfolio_class(Parameters).reset()
 
 # ------ UPDATE ------
-# Fetching Data to complete history
+# Fetching Data to complete nhistory
 if Parameters['Update_Values'] == True:
-    full_hist.update('7d')
+    full_hist.update('max')
 
 # Update Companies list if needed
 companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
@@ -70,7 +70,6 @@ full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
 # ----- DATASET ------
 # Reduce the dataset size to the period studied
 dataset = full_hist.new_format(Parameters['study_length'])
-
 
 if __name__ == "__main__":
     if Parameters['Optimization_run']:
@@ -203,17 +202,15 @@ if __name__ == "__main__":
 # Holding shares cost
 # If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
 # Comparainson to rating agencies
-# make a method for special tests
 # save B/S dict 
 # Autres fonctions B/S
 # - Zig zag
 # - Trend identification
 # - TCN (would need to diferentiate trend_length and the statset size)
 # For all ML models, create a dataset based on the parameters trend length and available info (trend, name), predict 1 day, do not change the set until the parameters are changed, as well for the saved  
-# World map with average price - Need county code 2 digits
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
 # Include volume
 # (Further dev) Dashboard d'évolution des fonds avec une simulation 1min = 1 sec (plotly ?) 
-# Calculate trend compared to industry trend²
+# Calculate trend compared to industry trend

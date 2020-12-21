@@ -1,5 +1,6 @@
 resources/ML_Dataset.csv
 idea/
 .ipynb_checkpoints/
+.vscode/
 functions/__pycache__/
 models/

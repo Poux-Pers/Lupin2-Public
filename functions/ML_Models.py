@@ -38,7 +38,8 @@ class ML_Models():
         self.trend_length = Parameters['trend_length']
         self.date_name = ''
         self.companies_list_path = Parameters['Companies_list_path']
-        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
+        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()        
+        self.parameters = Parameters
 
     def train_NN(self, dataset):
         # Define input and output
@@ -56,13 +57,16 @@ class ML_Models():
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
         # Fit the keras model on the dataset
-        model.fit(X, y, epochs=5, batch_size=100)
+        model.fit(X, y, epochs=15, batch_size=10)
 
         # evaluate the keras model
         _, accuracy = model.evaluate(X, y)
         print('Accuracy: %.2f' % (accuracy*100))
 
+        # Save the model and the parameters used
         model.save(os.getcwd()+self.NN_model_path)
+        with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+            json.dump(self.parameters, json_file)
 
         return()
 

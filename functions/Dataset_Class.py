@@ -56,6 +56,7 @@ class Dataset():
         self.hist_path = Parameters['hist_path']
         self.ML_dataset_path = Parameters['ML_dataset_path']    
         self.trend_length = Parameters['trend_length']
+        self.parameters = Parameters
         self.date_name = ''
         self.companies_list_path = Parameters['Companies_list_path']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
@@ -117,6 +118,7 @@ class Dataset():
             writer.writerows(zip(['Companies']+self.companies_list))
 
         self.hist = new_hist
+        self.save()
 
         return(self.hist)
 
@@ -191,7 +193,7 @@ class Dataset():
         # Normalize lines
         ML_dataset = ML_dataset.div(ML_dataset.max(axis=1)*2, axis=0)
         
-        # Save dataframe
+        # Save dataframe and the parameters used
         ML_dataset.to_csv(os.getcwd() + self.ML_dataset_path)
 
         return(ML_dataset)
@@ -224,7 +226,7 @@ if __name__ == "__main__":
  
     #full_hist.update('7d')
     full_hist.save()
-    print(full_hist.hist)
+    #print(full_hist.hist)
 
     dataset = full_hist.new_format(100000)
 
@@ -232,4 +234,4 @@ if __name__ == "__main__":
 
     new_hist = full_hist.create_ML_dataset(dataset)
     new_hist = new_hist.reset_index(drop=True)
-    print(new_hist)
+    #print(new_hist)

@@ -4,6 +4,7 @@
 
 # ---- LIBRARIES -----
 import os
+import json
 import keras
 import numpy as np
 import pandas as pd
@@ -13,6 +14,14 @@ from keras.layers import Dense
 
 # ---- FUNCTIONS -----
 from functions.Dataset_Class import Dataset
+from functions.ML_Models import ML_Models
+
+# -------------------- 
+# PARAMETERS
+# -------------------- 
+
+with open(os.getcwd()+'\\parameters\\Parameters.json', 'r') as json_file:
+    Parameters = json.load(json_file)
 
 
 # -------------------- 
@@ -30,8 +39,18 @@ sell_after_high_loss_ratio = 1.5
 
 class BuySell():
 
-    def __init__(self, short_hist_dataframe):
+    def __init__(self, short_hist_dataframe, Parameters):
         self.df = short_hist_dataframe
+        self.mesh = Parameters['Mesh']
+        self.trend_length = Parameters['trend_length']
+        self.initial_investment = Parameters['initial_investment']
+        self.ratio_of_gain_to_save = Parameters['ratio_of_gain_to_save']
+        self.ratio_max_investment_per_value = Parameters['ratio_max_investment_per_value']
+        self.BS_deals_print = Parameters['BS_deals_print']
+        self.transaction_fees_percentage = Parameters['transaction_fees_percentage']
+        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
+        self.models_to_use = Parameters['Models_to_use']
+        self.ML_dataset_parameters_path = Parameters['ML_dataset_parameters_path']
 
     def trend(self):
         # Creation of the dictionary to calculate trends
@@ -72,6 +91,7 @@ class BuySell():
 
         # List of companies without the total ('NASDAQ')
         companies_list = self.df.index[:-1].to_list()
+        #print(companies_list)
 
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
@@ -139,8 +159,25 @@ class BuySell():
         prediction_dict = {}
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
+
+        # TODO - load parameters used during model training and if trend different than current param re-create model and train and save param
+        with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
+            ML_Parameters = json.load(json_file)
+
+        if ML_Parameters['trend_length'] != self.trend_length:
+            # Hist loading and dataset creation
+            my_hist = Dataset(Parameters)
+            my_hist.load()
+            ML_dataset = my_hist.new_format(len(my_hist.hist))
+
+            # Create the dataset
+            ML_dataset = my_hist.create_ML_dataset(ML_dataset)
+
+            # Train the dataset
+            ML_Models(Parameters).train_NN(ML_dataset)
+
         # Load model
-        model = keras.models.load_model(os.getcwd()+"\\models\\NN")
+        model = keras.models.load_model(os.getcwd()+'\\models\\NN')
 
         # List of companies without the total ('NASDAQ')
         companies_list = self.df.index[:-1].to_list()
@@ -189,6 +226,6 @@ if __name__ == "__main__":
     
     dataset = Dataset(full_hist).new_format(study_length)
 
-    BS_dict, Trend_dict = BuySell(dataset).trend()
+    BS_dict, Trend_dict = BuySell(dataset, Parameters).trend()
     print(BS_dict, Trend_dict)
 

@@ -60,10 +60,6 @@ else:
 Portfolio = Portfolio_class(Parameters).reset()
 
 # ------ UPDATE ------
-# Fetching Data to complete history
-if Parameters['Update_Values'] == True:
-    full_hist.update('7d')
-
 # Update Companies list if needed
 companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
 
@@ -74,7 +70,7 @@ full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
 # Reduce the dataset size to the period studied
 dataset = full_hist.new_format(Parameters['study_length'])
 
-# ------- RUN --------
+# ------- RUN -------- TODO - Save printed text in a json
 # Trend
 # Reset other models
 for model in Parameters['Models_to_use']:
@@ -87,6 +83,7 @@ last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portf
 
 print('----- Trend -----')
 print('----- Average R²: '+str(R2)+' -----')
+print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
 # Graduated wheights
 # Reset other models
@@ -100,6 +97,7 @@ last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portf
 
 print('----- Graduated wheights -----')
 print('----- Average R²: '+str(R2)+' -----')
+print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
 # Trend + Graduated wheights
 # Reset other models
@@ -114,6 +112,7 @@ last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portf
 
 print('----- Trend + Graduated wheights -----')
 print('----- Average R²: '+str(R2)+' -----')
+print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
 # NN
 # Reset other models
@@ -127,3 +126,4 @@ last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portf
 
 print('----- Trend + Graduated wheights -----')
 print('----- Average R²: '+str(R2)+' -----')
+print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
