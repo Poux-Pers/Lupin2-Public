@@ -132,7 +132,7 @@ class Portfolio_class():
             # Getting the list of the values to buy and their prediction
             for model in self.models_to_use:
                 if self.models_to_use[model]:
-                    BS_dict, prediction_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
+                    BS_dict, prediction_dict, next_variation_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
 
                     # Add the results to the lists if we want to combine some models
                     BS_dict_list.append(BS_dict)
@@ -158,15 +158,15 @@ class Portfolio_class():
                 prediction_dict = prediction_dict_list[0]
 
             # Sorting the trend dict in reverse to get the best relative trends first
-            Sorted_Trend_dict = {k: v  for k, v in sorted(prediction_dict.items(), key=lambda item: item[1] , reverse=True)}
-            if 'NASDAQ' in Sorted_Trend_dict:
-                Sorted_Trend_dict.pop('NASDAQ')
+            sorted_next_variation_dict = {k: v  for k, v in sorted(next_variation_dict.items(), key=lambda item: item[1] , reverse=True)}
+            if 'NASDAQ' in sorted_next_variation_dict:
+                sorted_next_variation_dict.pop('NASDAQ')
 
             # Register the date in the portfolio
             Portfolio['Timestamp'] = datetime.datetime.now()
 
             # Current value update/buy/sell all in a loop to evaluate the current price only once since you can't buy and sell on at the same time
-            for company in Sorted_Trend_dict:
+            for company in sorted_next_variation_dict:
                 symbol_current_value = int(small_dataset.loc[company,:].to_list()[-1]*1000)/1000
                 Portfolio['Shares']['Current_Value'][company] = Portfolio['Shares']['Count'][company] * symbol_current_value
 
