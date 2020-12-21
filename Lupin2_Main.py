@@ -1,4 +1,12 @@
 # -------------------- 
+# INTRODUCTION
+# -------------------- 
+# Author: Poux Louis
+# Description: TODO
+# Python version: 3.9
+
+
+# -------------------- 
 # IMPORTS
 # -------------------- 
 
@@ -16,10 +24,11 @@ from tqdm.auto import tqdm
 
 # ---- FUNCTIONS -----
 from functions.Portfolio_Class import Portfolio_class
-from functions.BuySell_Trend import BuySellTrend
+from functions.BuySell_Models import BuySell
 from functions.Dataset_Class import Dataset
 from functions.ES_interaction import Elasticsearch_class
 from functions.Plot_Class import Plot
+
 
 # -------------------- 
 # PARAMETERS
@@ -48,9 +57,9 @@ else:
 Portfolio = Portfolio_class(Parameters).reset()
 
 # ------ UPDATE ------
-# Fetching Data to complete history
+# Fetching Data to complete nhistory
 if Parameters['Update_Values'] == True:
-    full_hist.update('7d')
+    full_hist.update('max')
 
 # Update Companies list if needed
 companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
@@ -61,10 +70,6 @@ full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
 # ----- DATASET ------
 # Reduce the dataset size to the period studied
 dataset = full_hist.new_format(Parameters['study_length'])
-
-# ---- PORTFOLIO  ----
-#Portfolio_class().simulation(dataset, Portfolio, trend_length, companies_list, initial_investment, ratio_of_gain_to_save, ratio_max_investment_per_value, BS_deals_print)
-
 
 if __name__ == "__main__":
     if Parameters['Optimization_run']:
@@ -169,7 +174,9 @@ if __name__ == "__main__":
 
         # Sending Portfolio to ES
         i = 0
-        if Parameters['Send_Porfolio_to_ES']:
+        if Parameters['Send_to_ES']:
+            Elasticsearch_class(Parameters).upload_hist()
+            Elasticsearch_class(Parameters).reset_portfolio_index()
             for portfolio in tqdm(Portfolio_history_list):
                 i += 1
                 Elasticsearch_class(Parameters).upload_dict(portfolio, i)
@@ -190,19 +197,20 @@ if __name__ == "__main__":
 # -------------------- 
 # TODO
 # Optimisation des paremètre avec affichage graphique
-# Autres fonctions B/S
 # Deals audit trail - Best deals, worst deals
-# Combining different B/S algo
 # Inflation - Bank %
 # Holding shares cost
-# Give parameters in BS functions like selling after high increase
 # If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
 # Comparainson to rating agencies
-# Scoring system!!!!!!!
+# save B/S dict 
+# Autres fonctions B/S
+# - Zig zag
+# - Trend identification
+# - TCN (would need to diferentiate trend_length and the statset size)
+# For all ML models, create a dataset based on the parameters trend length and available info (trend, name), predict 1 day, do not change the set until the parameters are changed, as well for the saved  
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
 # Include volume
-# Inclue Companies info
 # (Further dev) Dashboard d'évolution des fonds avec une simulation 1min = 1 sec (plotly ?) 
-# Calculate trend compared to industry trend²
+# Calculate trend compared to industry trend

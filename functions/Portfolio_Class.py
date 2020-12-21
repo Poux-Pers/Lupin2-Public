@@ -12,7 +12,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 
 # ---- FUNCTIONS -----
-from functions.BuySell_Trend import BuySellTrend
+from functions.BuySell_Models import BuySell
 
 
 # -------------------- 
@@ -40,6 +40,7 @@ class Portfolio_class():
         self.BS_deals_print = Parameters['BS_deals_print']
         self.transaction_fees_percentage = Parameters['transaction_fees_percentage']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
+        self.models_to_use = Parameters['Models_to_use']
 
     def create(self):
         # This function will create a portfolio structure if it doesn't already exists
@@ -110,6 +111,10 @@ class Portfolio_class():
         print('Portfolio simulation in progress')
 
         for day in tqdm(range(self.trend_length, len(dataset.columns.to_list()))):
+            # Reinitialization
+            BS_dict_list = []
+            prediction_dict_list = []
+
             # Reducing the dataset to the trend period studied and the companies in the companies list
             small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
 
@@ -124,12 +129,38 @@ class Portfolio_class():
                     sum_prediction_deviation[company] += (prediction_dict[company] - small_dataset.loc[company,:].to_list()[-1])**2
                     sum_mean_deviation[company] += (np.mean(small_dataset.loc[company,:].to_list()) - small_dataset.loc[company,:].to_list()[-1])**2
 
-            # Getting the list of the values to buy and their actual trend
-            BS_dict, prediction_dict = BuySellTrend(small_dataset).run()
+            # Getting the list of the values to buy and their prediction
+            for model in self.models_to_use:
+                if self.models_to_use[model]:
+                    BS_dict, prediction_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
+
+                    # Add the results to the lists if we want to combine some models
+                    BS_dict_list.append(BS_dict)
+                    prediction_dict_list.append(prediction_dict)
+
+            if len(BS_dict_list) > 1:
+                BS_dict = {}
+                prediction_dict = {}
+                for company in self.companies_list:
+                    values_list = small_dataset.loc[company,:].to_list()
+                    
+                    prediction_dict[company] = np.mean([pred_dict[company] for pred_dict in prediction_dict_list])
+                    
+                    # Condition to buy or Sell
+                    if prediction_dict[company] > values_list[-1]:
+                        BS_dict[company] = "Buy"
+
+                    else:
+                        BS_dict[company] = "Sell"
+
+            else:
+                BS_dict = BS_dict_list[0]
+                prediction_dict = prediction_dict_list[0]
 
             # Sorting the trend dict in reverse to get the best relative trends first
             Sorted_Trend_dict = {k: v  for k, v in sorted(prediction_dict.items(), key=lambda item: item[1] , reverse=True)}
-            Sorted_Trend_dict.pop('NASDAQ')
+            if 'NASDAQ' in Sorted_Trend_dict:
+                Sorted_Trend_dict.pop('NASDAQ')
 
             # Register the date in the portfolio
             Portfolio['Timestamp'] = datetime.datetime.now()
@@ -177,12 +208,12 @@ class Portfolio_class():
             
             # Portfolio audit trail creation
             Savings = self.value(Portfolio, small_dataset)
-            Portfolio_history.append(Savings)
+            Portfolio_history.append({**Portfolio, **Savings})
+            #Portfolio_history.append(Portfolio | Savings) # ALERT only in python 3.9
 
             self.portfolio = Portfolio
         
-
-        R2 = np.mean([1 - sum_prediction_deviation[x]/sum_mean_deviation[x] for x in sum_prediction_deviation])
+        R2 = int(np.mean([1 - sum_prediction_deviation[x]/sum_mean_deviation[x] for x in sum_prediction_deviation])*1000)/1000
         
         return(Portfolio, Portfolio_history, R2)
 

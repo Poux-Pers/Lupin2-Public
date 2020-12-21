@@ -16,7 +16,7 @@ from tqdm.auto import tqdm
 
 # ---- FUNCTIONS -----
 from functions.Portfolio_Class import Portfolio_class
-from functions.BuySell_Trend import BuySellTrend
+from functions.BuySell_Models import BuySell
 from functions.Dataset_Class import Dataset
 from functions.ES_interaction import Elasticsearch_class
 
