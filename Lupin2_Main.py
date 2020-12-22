@@ -207,7 +207,6 @@ if __name__ == "__main__":
 # - Zig zag
 # - Trend identification
 # - TCN (would need to diferentiate trend_length and the statset size)
-# For all ML models, create a dataset based on the parameters trend length and available info (trend, name), predict 1 day, do not change the set until the parameters are changed, as well for the saved  
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies

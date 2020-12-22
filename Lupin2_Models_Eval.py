@@ -12,6 +12,7 @@
 
 # ---- LIBRARIES -----
 import os
+import sys
 import time
 import json
 import keras
@@ -39,6 +40,9 @@ from functions.Plot_Class import Plot
 
 with open(os.getcwd()+'\\parameters\\Parameters.json', 'r') as json_file:
     Parameters = json.load(json_file)
+
+# Opening the log file
+sys.stdout = open(os.getcwd()+'\\models\\logs\\Model_Eval_'+str(Parameters['trend_length'])+'.txt', 'w')
 
 
 # -------------------- 
@@ -70,7 +74,11 @@ full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
 # Reduce the dataset size to the period studied
 dataset = full_hist.new_format(Parameters['study_length'])
 
-# ------- RUN -------- TODO - Save printed text in a json
+# ------- RUN -------- 
+# Print parameters
+print('##### Trend length: '+str(Parameters['trend_length'])+' #####')
+print('##### Study length: '+str(Parameters['study_length'])+' #####')
+
 # Trend
 # Reset other models
 for model in Parameters['Models_to_use']:
@@ -82,7 +90,7 @@ Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- Trend -----')
-print('----- Average R²: '+str(R2)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
 # Graduated wheights
@@ -96,7 +104,7 @@ Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- Graduated wheights -----')
-print('----- Average R²: '+str(R2)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
 # Trend + Graduated wheights
@@ -111,7 +119,7 @@ Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- Trend + Graduated wheights -----')
-print('----- Average R²: '+str(R2)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
 # NN
@@ -125,20 +133,23 @@ Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- NN -----')
-print('----- Average R²: '+str(R2)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
 # NN - Trend
 # Reset other models
-for model in Parameters['Models_to_use']:
-    Parameters['Models_to_use'][model] = False
+#for model in Parameters['Models_to_use']:
+#    Parameters['Models_to_use'][model] = False
+#
+#Parameters['Models_to_use']['NN'] = True
+#Parameters['Models_to_use']['trend'] = True
+#Portfolio = Portfolio_class(Parameters)
+#Portfolio.reset()
+#last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+#
+#print('----- NN + Trend -----')
+#print('----- Average R2: '+str(R2)+' -----')
+#print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
-Parameters['Models_to_use']['NN'] = True
-Parameters['Models_to_use']['trend'] = True
-Portfolio = Portfolio_class(Parameters)
-Portfolio.reset()
-last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
-
-print('----- NN + Trend -----')
-print('----- Average R²: '+str(R2)+' -----')
-print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+# Close the log file
+sys.stdout.close()

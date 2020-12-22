@@ -4,3 +4,4 @@ idea/
 .vscode/
 functions/__pycache__/
 models/
+logs/
