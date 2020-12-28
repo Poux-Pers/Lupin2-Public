@@ -65,11 +65,11 @@ if Parameters['Update_Values'] == True:
 companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
 
 # Using only the symbols of the company list
-full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
+full_hist.hist = full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
 
 # ----- DATASET ------
 # Reduce the dataset size to the period studied
-dataset = full_hist.new_format(Parameters['study_length'])
+dataset = full_hist.new_format(Parameters['study_length']).fillna(0)
 
 if __name__ == "__main__":
     if Parameters['Optimization_run']:
@@ -185,6 +185,7 @@ if __name__ == "__main__":
         # Print last Savings
         print(Portfolio_history_list[-1])
         # Print relative ROI
+        
         print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
         print('----- Average R²: '+str(R2)+' -----')
 

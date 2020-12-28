@@ -72,7 +72,7 @@ full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
 
 # ----- DATASET ------
 # Reduce the dataset size to the period studied
-dataset = full_hist.new_format(Parameters['study_length'])
+dataset = full_hist.new_format(Parameters['study_length']).fillna(0)
 
 # ------- RUN -------- 
 # Print parameters

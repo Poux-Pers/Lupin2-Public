@@ -188,7 +188,7 @@ class Portfolio_class():
                             print(str(int(nb_symbols_to_buy))+' x '+company+'\x1b[1;32;40'+' bought '+'\x1b[0m'+'at '+str(symbol_current_value)+' ('+str(buy_value)+'$ Total - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$')
 
                 # ----- SELLING ------
-                nb_symbols_to_sell = int(Portfolio['Shares']['Count'][company])
+                nb_symbols_to_sell = int(Portfolio['Shares']['Count'][company]*self.ratio_max_investment_per_value)
 
                 if BS_dict[company] == 'Sell' and nb_symbols_to_sell >= 1 and symbol_current_value > 0:
                     # Sell all

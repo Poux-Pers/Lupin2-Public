@@ -38,7 +38,7 @@ sell_after_high_loss_ratio = 1.5
 # -------------------- 
 
 class BuySell():
-
+    
     def __init__(self, short_hist_dataframe, Parameters):
         self.df = short_hist_dataframe
         self.mesh = Parameters['Mesh']

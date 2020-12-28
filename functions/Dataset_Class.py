@@ -6,6 +6,7 @@
 import os
 import csv
 import json
+import cryptocompare
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -106,6 +107,45 @@ class Dataset():
 
         # Concat and remove duplicates
         new_hist = pd.concat(list_of_df_to_merge)[self.hist.columns]
+        new_hist = new_hist.drop_duplicates(subset=[self.date_name, 'Company'], keep='last')
+
+        # reset index for the new dataframe
+        new_hist = new_hist.reset_index(drop=True)
+        new_hist
+
+        # Update Company list
+        with open(os.getcwd() + self.companies_list_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerows(zip(['Companies']+self.companies_list))
+
+        self.hist = new_hist
+        self.save()
+
+        return(self.hist)
+
+    def update_btc(self):
+        # Fetch info
+        btc_hist = cryptocompare.get_historical_price_day('BTC', curr='USD', limit=2000)
+
+        # Load
+        df_hist = pd.DataFrame(btc_hist)
+
+        # Time format
+        df_hist['time'] = pd.to_datetime(df_hist['time'], unit='s')
+
+        # Rename
+        df_hist = df_hist.rename(columns={"time": "Date", "open": "Open", "high": "High", "low": "Low", "close": "Close", "volumeto": "Volume"})
+
+        # Reorder columns
+        df_hist = df_hist[['Date','Open','High','Low','Close','Volume']]
+
+        # Completion with fake values
+        df_hist['Dividends'] = len(df_hist) * [0]
+        df_hist['Stock Splits'] = len(df_hist) * [0]
+        df_hist['Company'] = len(df_hist) * ['BTC']
+
+        # Concat and remove duplicates
+        new_hist = pd.concat([self.hist, df_hist])[self.hist.columns]
         new_hist = new_hist.drop_duplicates(subset=[self.date_name, 'Company'], keep='last')
 
         # reset index for the new dataframe
@@ -224,7 +264,7 @@ if __name__ == "__main__":
     else:
         full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].dt.floor('min')
  
-    #full_hist.update('7d')
+    full_hist.update_btc()
     full_hist.save()
     #print(full_hist.hist)
 
