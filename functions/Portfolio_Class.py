@@ -41,6 +41,7 @@ class Portfolio_class():
         self.transaction_fees_percentage = Parameters['transaction_fees_percentage']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
         self.models_to_use = Parameters['Models_to_use']
+        self.allow_loss = Parameters['allow_loss']
 
     def create(self):
         # This function will create a portfolio structure if it doesn't already exists
@@ -104,8 +105,11 @@ class Portfolio_class():
             sum_prediction_deviation[company] = 0
             sum_mean_deviation[company] = 0
 
-        # Reducin the dataset only to the companies in the list
-        dataset = dataset[dataset.index.isin(self.companies_list+['NASDAQ'])]
+        # Reduce the dataset only to the companies in the list
+        if len(self.companies_list) > 1:
+            dataset = dataset[dataset.index.isin(self.companies_list+['NASDAQ'])]
+        else:
+            dataset = dataset[dataset.index.isin(self.companies_list)]
         
         # Visual feedback
         print('Portfolio simulation in progress')
@@ -170,7 +174,7 @@ class Portfolio_class():
                 symbol_current_value = int(small_dataset.loc[company,:].to_list()[-1]*1000)/1000
                 Portfolio['Shares']['Current_Value'][company] = Portfolio['Shares']['Count'][company] * symbol_current_value
 
-                # ----- BUYING ------ 
+                # ----- BUYING ------
                 if BS_dict[company] == 'Buy' and symbol_current_value > 0:
                     
                     # Buy as much as possible
@@ -197,11 +201,11 @@ class Portfolio_class():
                     profit = sell_value - Portfolio['Shares']['Buy_Value'][company]
                     
                     # Portfolio update
-                    if profit > 0:
+                    if profit > 0 or self.allow_loss:
                         Portfolio['Money']['Spending Money'] += sell_value*(100-self.transaction_fees_percentage)/100 - profit * self.ratio_of_gain_to_save
                         Portfolio['Money']['Savings'] += profit*self.ratio_of_gain_to_save
-                        Portfolio['Shares']['Count'][company] = 0
-                        Portfolio['Shares']['Buy_Value'][company] = 0
+                        Portfolio['Shares']['Count'][company] -= nb_symbols_to_sell
+                        Portfolio['Shares']['Buy_Value'][company] -= sell_value
 
                         if self.BS_deals_print:
                             print(str(int(nb_symbols_to_sell))+' x '+company+'\x1b[1;31;40'+' sold '+'\x1b[0m'+'at '+str(symbol_current_value)+' (Profit: '+'\x1b[3;30;43'+str(int(profit*1000)/1000)+'$ '+'\x1b[0m'+'- Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$')

@@ -76,7 +76,10 @@ class BuySell():
 
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
-        avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+        if len(self.companies_list) > 1:
+            avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+        else:
+            avg_next_variation = 1
 
         # Buy or Sell dictionary filling
         for company in self.companies_list:
@@ -123,11 +126,14 @@ class BuySell():
                 next_variation_dict[company] = 1
 
         # Creation of the dictionary to advise Buy or Sell
-        avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
-
+        if len(self.companies_list) > 1:
+            avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+        else:
+            avg_next_variation = 1        
+        
         # Buy or Sell dictionary filling
         for company in self.companies_list:
-            # Condition to buy or Sell
+            # Condition to buy or Sell            
             if next_variation_dict[company] > avg_next_variation:
                 BS_dict[company] = "Buy"
 
@@ -192,7 +198,10 @@ class BuySell():
                 next_variation_dict[company] = 1
 
         # Creation of the dictionary to advise Buy or Sell
-        avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+        if len(self.companies_list) > 1:
+            avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+        else:
+            avg_next_variation = 1
 
         # Buy or Sell dictionary filling
         for company in self.companies_list:

@@ -207,7 +207,10 @@ if __name__ == "__main__":
 # Autres fonctions B/S
 # - Zig zag
 # - Trend identification
-# - TCN (would need to diferentiate trend_length and the statset size)
+# - TCN (would need to diferentiate trend_length and the stat))set size)
+# elliott waves and others
+# print number of deals made
+# - Quantdom project
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
