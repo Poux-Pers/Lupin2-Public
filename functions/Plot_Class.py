@@ -21,7 +21,7 @@ class Plot():
         self.list_Shares_value = []
         self.Portfolio_history = []
 
-    def portfolio_history(self, Portfolio_history, dataset):
+    def portfolio_history(self, Portfolio_history, dataset, deals_history_dict):
         # List construction
         for Savings in Portfolio_history:
             self.list_Total_Value.append(Savings['Total value'])
@@ -31,7 +31,7 @@ class Plot():
             self.list_Shares_value.append(Savings['Shares value'])            
             
         # Plot savings
-        fig, axs = plt.subplots(3, 1)
+        fig, axs = plt.subplots(4, 1)
         fig.suptitle('Savings over time')
 
         x_list = dataset.columns.to_list()[self.Parameters['trend_length']:]
@@ -46,4 +46,8 @@ class Plot():
 
         # Sub plot for ROI
         axs[2].plot(x_list, self.list_ROI)
+
+        # Sub plot for deals volume
+        deals_count_list = [len(deals_history_dict[x]) for x in deals_history_dict]
+        axs[3].plot(x_list, deals_count_list)
         plt.show(block = False)

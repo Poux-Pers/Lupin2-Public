@@ -45,10 +45,6 @@ class Elasticsearch_class():
         # Create index
         self.es.indices.create(index='hist_'+self.mesh,body={})
 
-        
-
-        # TODO Only add what is not already on ES
-
         # Recover data
         if self.mesh == '1m':
             self.path = os.getcwd() + '\\resources\\full_NASDAQ_history_1m.csv'

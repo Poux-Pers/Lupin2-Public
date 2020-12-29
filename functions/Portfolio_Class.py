@@ -6,6 +6,7 @@
 import os
 import json
 import datetime
+import math as ma
 import numpy as np
 import pandas as pd
 
@@ -41,6 +42,7 @@ class Portfolio_class():
         self.transaction_fees_percentage = Parameters['transaction_fees_percentage']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
         self.models_to_use = Parameters['Models_to_use']
+        self.allow_loss = Parameters['allow_loss']
 
     def create(self):
         # This function will create a portfolio structure if it doesn't already exists
@@ -98,14 +100,18 @@ class Portfolio_class():
         sum_prediction_deviation = {}
         sum_mean_deviation = {}
         list_R2 = []
+        deals_history_dict = {}
 
         # Dict initialization
         for company in self.companies_list:
             sum_prediction_deviation[company] = 0
             sum_mean_deviation[company] = 0
 
-        # Reducin the dataset only to the companies in the list
-        dataset = dataset[dataset.index.isin(self.companies_list+['NASDAQ'])]
+        # Reduce the dataset only to the companies in the list
+        if len(self.companies_list) > 1:
+            dataset = dataset[dataset.index.isin(self.companies_list+['NASDAQ'])]
+        else:
+            dataset = dataset[dataset.index.isin(self.companies_list)]
         
         # Visual feedback
         print('Portfolio simulation in progress')
@@ -114,6 +120,7 @@ class Portfolio_class():
             # Reinitialization
             BS_dict_list = []
             prediction_dict_list = []
+            deals_history_dict[day] = []
 
             # Reducing the dataset to the trend period studied and the companies in the companies list
             small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
@@ -170,7 +177,7 @@ class Portfolio_class():
                 symbol_current_value = int(small_dataset.loc[company,:].to_list()[-1]*1000)/1000
                 Portfolio['Shares']['Current_Value'][company] = Portfolio['Shares']['Count'][company] * symbol_current_value
 
-                # ----- BUYING ------ 
+                # ----- BUYING ------
                 if BS_dict[company] == 'Buy' and symbol_current_value > 0:
                     
                     # Buy as much as possible
@@ -184,11 +191,13 @@ class Portfolio_class():
                         Portfolio['Shares']['Buy_Value'][company] += buy_value
                         
                         # Print deal details
+                        deal_str = str(int(nb_symbols_to_buy))+' x '+company+' bought at '+str(symbol_current_value)+' (Total: '+str(buy_value)+'$ - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'
+                        deals_history_dict[day].append(deal_str)
                         if self.BS_deals_print:
-                            print(str(int(nb_symbols_to_buy))+' x '+company+'\x1b[1;32;40'+' bought '+'\x1b[0m'+'at '+str(symbol_current_value)+' ('+str(buy_value)+'$ Total - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$')
+                            print(deal_str)
 
                 # ----- SELLING ------
-                nb_symbols_to_sell = int(Portfolio['Shares']['Count'][company]*self.ratio_max_investment_per_value)
+                nb_symbols_to_sell = ma.ceil(Portfolio['Shares']['Count'][company]*self.ratio_max_investment_per_value)
 
                 if BS_dict[company] == 'Sell' and nb_symbols_to_sell >= 1 and symbol_current_value > 0:
                     # Sell all
@@ -197,14 +206,17 @@ class Portfolio_class():
                     profit = sell_value - Portfolio['Shares']['Buy_Value'][company]
                     
                     # Portfolio update
-                    if profit > 0:
+                    if sell_value*(100-self.transaction_fees_percentage)/100 > Portfolio['Shares']['Buy_Value'][company] or self.allow_loss:
                         Portfolio['Money']['Spending Money'] += sell_value*(100-self.transaction_fees_percentage)/100 - profit * self.ratio_of_gain_to_save
                         Portfolio['Money']['Savings'] += profit*self.ratio_of_gain_to_save
-                        Portfolio['Shares']['Count'][company] = 0
-                        Portfolio['Shares']['Buy_Value'][company] = 0
+                        Portfolio['Shares']['Count'][company] -= nb_symbols_to_sell
+                        Portfolio['Shares']['Buy_Value'][company] -= sell_value
 
+                        # Print deal details
+                        deal_str = str(int(nb_symbols_to_sell))+' x '+company+' sold at '+str(symbol_current_value)+' (Profit: '+str(int(profit*1000)/1000)+'$ - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'
+                        deals_history_dict[day].append(deal_str)
                         if self.BS_deals_print:
-                            print(str(int(nb_symbols_to_sell))+' x '+company+'\x1b[1;31;40'+' sold '+'\x1b[0m'+'at '+str(symbol_current_value)+' (Profit: '+'\x1b[3;30;43'+str(int(profit*1000)/1000)+'$ '+'\x1b[0m'+'- Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$')
+                            print(deal_str)
             
             # Portfolio audit trail creation
             Savings = self.value(Portfolio, small_dataset)
@@ -213,9 +225,9 @@ class Portfolio_class():
 
             self.portfolio = Portfolio
         
-        R2 = int(np.mean([1 - sum_prediction_deviation[x]/sum_mean_deviation[x] for x in sum_prediction_deviation])*1000)/1000
+        R2 = int(np.mean([1 - sum_prediction_deviation[x]/(sum_mean_deviation[x]+0.00000000000000001) for x in sum_prediction_deviation])*1000)/1000 # temp fix to avoid /O
         
-        return(Portfolio, Portfolio_history, R2)
+        return(Portfolio, Portfolio_history, R2, deals_history_dict)
 
 
 if __name__ == "__main__":

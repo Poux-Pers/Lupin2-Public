@@ -95,7 +95,7 @@ if __name__ == "__main__":
             Portfolio = Portfolio_class(Parameters)
             Portfolio.reset()
             Portfolio_history_list = []
-            last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+            last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
             trend_length_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
             trend_length_R2_list.append(R2)
@@ -114,7 +114,7 @@ if __name__ == "__main__":
             Portfolio = Portfolio_class(Parameters)
             Portfolio.reset()
             Portfolio_history_list = []
-            last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+            last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
             ratio_of_gain_to_save_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
             Portfolio = Portfolio_class(Parameters)
             Portfolio.reset()
             Portfolio_history_list = []
-            last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+            last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
             ratio_max_investment_per_value_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
 
@@ -146,7 +146,7 @@ if __name__ == "__main__":
             Portfolio = Portfolio_class(Parameters)
             Portfolio.reset()
             Portfolio_history_list = []
-            last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+            last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
             initial_investment_relative_ROI_list.append(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)
 
@@ -166,11 +166,11 @@ if __name__ == "__main__":
         # ------- RUN --------
         Portfolio = Portfolio_class(Parameters)
         Portfolio.reset()
-        last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+        last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
         # ------- PLOT -------
         if Parameters['Plot_Graph']:
-            Plot(Parameters).portfolio_history(Portfolio_history_list, dataset)
+            Plot(Parameters).portfolio_history(Portfolio_history_list, dataset, deals_history_dict)
 
         # Sending Portfolio to ES
         i = 0
@@ -184,8 +184,8 @@ if __name__ == "__main__":
         # ------- KPI --------
         # Print last Savings
         print(Portfolio_history_list[-1])
-        # Print relative ROI
-        
+
+        # Print relative ROI        
         print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
         print('----- Average R²: '+str(R2)+' -----')
 
@@ -207,10 +207,21 @@ if __name__ == "__main__":
 # Autres fonctions B/S
 # - Zig zag
 # - Trend identification
-# - TCN (would need to diferentiate trend_length and the statset size)
+# - TCN (would need to diferentiate trend_length and the stat))set size)
+# - Buy for 3 increase in a row, sell for 3 loss in a row
+# - Elliott waves rules
+# - random walks (probabiliti of 1/2 to go up, 1/2 to go down, of a variation: avg variance)
+# - ARMA
+# - GARCH
+# https://commodity.com/technical-analysis/
+# Quantdom project
+# Identification de valeurs refuge
+# trust indice based on the historical R² of the company
+# Count the money lost in deals 
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
 # Include volume
 # (Further dev) Dashboard d'évolution des fonds avec une simulation 1min = 1 sec (plotly ?) 
 # Calculate trend compared to industry trend
+# Save in the trend the best model to describe the company stock variation

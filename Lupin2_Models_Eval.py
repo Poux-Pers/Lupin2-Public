@@ -87,7 +87,7 @@ for model in Parameters['Models_to_use']:
 Parameters['Models_to_use']['trend'] = True
 Portfolio = Portfolio_class(Parameters)
 Portfolio.reset()
-last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- Trend -----')
 print('----- Average R2: '+str(R2)+' -----')
@@ -101,7 +101,7 @@ for model in Parameters['Models_to_use']:
 Parameters['Models_to_use']['graduated_weights'] = True
 Portfolio = Portfolio_class(Parameters)
 Portfolio.reset()
-last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- Graduated wheights -----')
 print('----- Average R2: '+str(R2)+' -----')
@@ -116,7 +116,7 @@ Parameters['Models_to_use']['trend'] = True
 Parameters['Models_to_use']['graduated_weights'] = True
 Portfolio = Portfolio_class(Parameters)
 Portfolio.reset()
-last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- Trend + Graduated wheights -----')
 print('----- Average R2: '+str(R2)+' -----')
@@ -130,26 +130,25 @@ for model in Parameters['Models_to_use']:
 Parameters['Models_to_use']['NN'] = True
 Portfolio = Portfolio_class(Parameters)
 Portfolio.reset()
-last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
+last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- NN -----')
 print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
-# NN - Trend
+# Random walks
 # Reset other models
-#for model in Parameters['Models_to_use']:
-#    Parameters['Models_to_use'][model] = False
-#
-#Parameters['Models_to_use']['NN'] = True
-#Parameters['Models_to_use']['trend'] = True
-#Portfolio = Portfolio_class(Parameters)
-#Portfolio.reset()
-#last_portfolio, Portfolio_history_list, R2 = Portfolio.simulation(dataset, Portfolio.portfolio)
-#
-#print('----- NN + Trend -----')
-#print('----- Average R2: '+str(R2)+' -----')
-#print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+for model in Parameters['Models_to_use']:
+    Parameters['Models_to_use'][model] = False
+
+Parameters['Models_to_use']['random_walks'] = True
+Portfolio = Portfolio_class(Parameters)
+Portfolio.reset()
+last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+print('----- Random walks -----')
+print('----- Average R2: '+str(R2)+' -----')
+print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 
 # Close the log file
 sys.stdout.close()

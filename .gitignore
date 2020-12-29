@@ -5,3 +5,4 @@ idea/
 functions/__pycache__/
 models/
 logs/
+resources/full_NASDAQ_history_Full.csv
