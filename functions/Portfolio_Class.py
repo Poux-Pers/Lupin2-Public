@@ -206,7 +206,11 @@ class Portfolio_class():
                     profit = sell_value - Portfolio['Shares']['Buy_Value'][company]
                     
                     # Portfolio update
+<<<<<<< HEAD
                     if sell_value*(100-self.transaction_fees_percentage)/100 > Portfolio['Shares']['Buy_Value'][company] or self.allow_loss:
+=======
+                    if profit > 0 or self.allow_loss:
+>>>>>>> d535cb55810030e26c3b1defdcc84b2acfaeafa3
                         Portfolio['Money']['Spending Money'] += sell_value*(100-self.transaction_fees_percentage)/100 - profit * self.ratio_of_gain_to_save
                         Portfolio['Money']['Savings'] += profit*self.ratio_of_gain_to_save
                         Portfolio['Shares']['Count'][company] -= nb_symbols_to_sell

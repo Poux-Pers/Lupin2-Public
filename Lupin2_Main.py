@@ -208,6 +208,7 @@ if __name__ == "__main__":
 # - Zig zag
 # - Trend identification
 # - TCN (would need to diferentiate trend_length and the stat))set size)
+<<<<<<< HEAD
 # - Buy for 3 increase in a row, sell for 3 loss in a row
 # - Elliott waves rules
 # - random walks (probabiliti of 1/2 to go up, 1/2 to go down, of a variation: avg variance)
@@ -218,6 +219,11 @@ if __name__ == "__main__":
 # Identification de valeurs refuge
 # trust indice based on the historical R² of the company
 # Count the money lost in deals 
+=======
+# elliott waves and others
+# print number of deals made
+# - Quantdom project
+>>>>>>> d535cb55810030e26c3b1defdcc84b2acfaeafa3
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
