@@ -207,10 +207,9 @@ if __name__ == "__main__":
 # Autres fonctions B/S
 # - Zig zag
 # - Trend identification
-# - TCN (would need to diferentiate trend_length and the stat))set size)
+# - TCN (would need to differentiate trend_length and the stat))set size)
 # - Buy for 3 increase in a row, sell for 3 loss in a row
 # - Elliott waves rules
-# - random walks (probabiliti of 1/2 to go up, 1/2 to go down, of a variation: avg variance)
 # - ARMA
 # - GARCH
 # https://commodity.com/technical-analysis/

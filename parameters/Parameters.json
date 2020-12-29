@@ -1,7 +1,7 @@
 {
     "Update_Values": false,
     "Mesh": "1d",
-    "trend_length": 5,
+    "trend_length": 8,
     "study_length": 500,
     "initial_investment": 5000,
     "transaction_fees_percentage": 1,
@@ -17,7 +17,7 @@
     "Send_to_ES": false,
     "Plot_Graph": true,
     "Models_to_use":{
-      "trend": true,
+      "trend": false,
       "graduated_weights": false,
       "NN": false,
       "random_walks": true

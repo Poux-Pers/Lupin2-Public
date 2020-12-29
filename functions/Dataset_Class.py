@@ -123,9 +123,9 @@ class Dataset():
 
         return(self.hist)
 
-    def update_btc(self):
+    def update_crypto(self, cryptoname):
         # Fetch info
-        btc_hist = cryptocompare.get_historical_price_day('BTC', curr='USD', limit=2000)
+        btc_hist = cryptocompare.get_historical_price_day(cryptoname, curr='USD', limit=2000)
 
         # Load
         df_hist = pd.DataFrame(btc_hist)
@@ -142,7 +142,7 @@ class Dataset():
         # Completion with fake values
         df_hist['Dividends'] = len(df_hist) * [0]
         df_hist['Stock Splits'] = len(df_hist) * [0]
-        df_hist['Company'] = len(df_hist) * ['BTC']
+        df_hist['Company'] = len(df_hist) * [cryptoname]
 
         # Concat and remove duplicates
         new_hist = pd.concat([self.hist, df_hist])[self.hist.columns]
@@ -264,11 +264,11 @@ if __name__ == "__main__":
     else:
         full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].dt.floor('min')
  
-    full_hist.update_btc()
+    full_hist.update_crypto('ETH')
     full_hist.save()
     #print(full_hist.hist)
 
-    dataset = full_hist.new_format(100000)
+    dataset = full_hist.new_format(1000)
 
     #print(full_hist.enrich_symbol(['sector', 'country', 'shortName']))
 
