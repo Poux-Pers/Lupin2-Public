@@ -34,3 +34,7 @@ Pipenv shell
 *put in pipfile major librairies*
 Pipenv install --dev or pipenv install
 Pipenv update *maj du lock avec le pipfile
+
+# Add a kernel in jupyter
+# pip install ipykernel + cd in interpreter folder 
+python -m ipykernel install --name "Python38"

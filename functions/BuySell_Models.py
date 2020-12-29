@@ -6,6 +6,7 @@
 import os
 import json
 import keras
+import random
 import numpy as np
 import pandas as pd
 
@@ -38,7 +39,7 @@ sell_after_high_loss_ratio = 1.5
 # -------------------- 
 
 class BuySell():
-
+    
     def __init__(self, short_hist_dataframe, Parameters):
         self.df = short_hist_dataframe
         self.mesh = Parameters['Mesh']
@@ -54,7 +55,7 @@ class BuySell():
 
     def trend(self):
         # Creation of the dictionary to calculate trends
-        trends_dict = {}
+        next_variation_dict = {}
         prediction_dict = {}
 
         # Trends dictionary filling
@@ -69,60 +70,50 @@ class BuySell():
             # Calculate next value for accuracy 
             prediction_dict[company] = len(values_list) * a + b
 
-            # Calculate relative trend
-            if np.mean(values_list) != 0:
-                trends_dict[company] = a / np.mean(values_list)
+            if values_list[-1] > 0:
+                next_variation_dict[company] = prediction_dict[company] / values_list[-1]
             else:
-                trends_dict[company] = 0
+                next_variation_dict[company] = 1
+
+        # Creation of the dictionary to advise Buy or Sell
+        BS_dict = {}
+        if len(self.companies_list) > 1:
+            avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+        else:
+            avg_next_variation = 1
+
+        # Buy or Sell dictionary filling
+        for company in self.companies_list:
+            # Condition to buy or Sell
+            if next_variation_dict[company] > avg_next_variation:
+                BS_dict[company] = "Buy"
+
+            else:
+                BS_dict[company] = "Sell"
 
             # Specific rules
             if add_specific_rules:
                 # Sell after a high rise
                 if values_list[-1] > sell_after_high_rise_ratio * values_list[-2]:
-                    trends_dict[company] = 0
+                    BS_dict[company] = "Sell"
 
                 # Sell after a high loss
                 if values_list[-1] < values_list[-2]/sell_after_high_loss_ratio:
-                    trends_dict[company] = 0
+                    BS_dict[company] = "Sell"
 
                 # Stagnation
                 if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
-                    trends_dict[company] = 0
-
-        # List of companies without the total ('NASDAQ')
-        companies_list = self.df.index[:-1].to_list()
-        #print(companies_list)
-
-        # Creation of the dictionary to advise Buy or Sell
-        BS_dict = {}
-        Trend_dict={}
-
-        # Buy or Sell dictionary filling
-        for company in companies_list:
-            trend = trends_dict[company]
-            general_trend = trends_dict['NASDAQ']
-
-            BS_dict[company] = {}
-
-            # Condition to buy or Sell
-            if trend > 0 and trend/general_trend >= 1:
-                BS_dict[company] = "Buy"
-                Trend_dict[company] = trend
-
-            else:
-                BS_dict[company] = "Sell"
-                Trend_dict[company] = trend
+                    BS_dict[company] = "Sell"
         
-        return(BS_dict, prediction_dict)
+        return(BS_dict, prediction_dict, next_variation_dict)
 
     def graduated_weights(self):
         # Creation of the dictionary to calculate next values
         prediction_dict = {}
+        next_variation_dict = {}
+
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
-
-        # List of companies without the total ('NASDAQ')
-        companies_list = self.df.index[:-1].to_list()
 
         # Prediction dictionary filling
         for company in self.df.index:
@@ -130,9 +121,21 @@ class BuySell():
 
             # calculate next value for accuracy 
             prediction_dict[company] = sum([values_list[x]/2**(len(values_list)-x) for x in range(len(values_list))])/sum([1/2**(len(values_list)-x) for x in range(len(values_list))])
+            if values_list[-1] > 0:
+                next_variation_dict[company] = prediction_dict[company] / values_list[-1]
+            else:
+                next_variation_dict[company] = 1
 
-            # Condition to buy or Sell
-            if prediction_dict[company] > values_list[-1]:
+        # Creation of the dictionary to advise Buy or Sell
+        if len(self.companies_list) > 1:
+            avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+        else:
+            avg_next_variation = 1        
+        
+        # Buy or Sell dictionary filling
+        for company in self.companies_list:
+            # Condition to buy or Sell            
+            if next_variation_dict[company] > avg_next_variation:
                 BS_dict[company] = "Buy"
 
             else:
@@ -152,15 +155,17 @@ class BuySell():
                 if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
                     BS_dict[company] = "Sell"
         
-        return(BS_dict, prediction_dict)
+        return(BS_dict, prediction_dict, next_variation_dict)
 
     def NN(self):
         # Creation of the dictionary to calculate next values
         prediction_dict = {}
+        next_variation_dict = {}
+
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
 
-        # TODO - load parameters used during model training and if trend different than current param re-create model and train and save param
+        # Load parameters used during model training and if trend different than current param re-create model and train and save param
         with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
             ML_Parameters = json.load(json_file)
 
@@ -179,11 +184,8 @@ class BuySell():
         # Load model
         model = keras.models.load_model(os.getcwd()+'\\models\\NN')
 
-        # List of companies without the total ('NASDAQ')
-        companies_list = self.df.index[:-1].to_list()
-
         # Prediction dictionary filling
-        for company in self.df.index:
+        for company in self.companies_list:
             values_list = self.df.loc[company,:].to_list()
 
             # Normalize
@@ -191,10 +193,21 @@ class BuySell():
 
             # calculate next value for accuracy 
             prediction_dict[company] = model.predict(np.array([[x/normalizer for x in values_list]], dtype=float)) * normalizer
-            #print(values_list, [x/normalizer for x in values_list], prediction_dict[company])
+            if values_list[-1] > 0:
+                next_variation_dict[company] = prediction_dict[company] / values_list[-1]
+            else:
+                next_variation_dict[company] = 1
 
+        # Creation of the dictionary to advise Buy or Sell
+        if len(self.companies_list) > 1:
+            avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+        else:
+            avg_next_variation = 1
+
+        # Buy or Sell dictionary filling
+        for company in self.companies_list:
             # Condition to buy or Sell
-            if prediction_dict[company] > values_list[-1]:
+            if next_variation_dict[company] > avg_next_variation:
                 BS_dict[company] = "Buy"
 
             else:
@@ -214,7 +227,60 @@ class BuySell():
                 if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
                     BS_dict[company] = "Sell"
         
-        return(BS_dict, prediction_dict)
+        return(BS_dict, prediction_dict, next_variation_dict)
+
+    def random_walks(self):
+        # Creation of the dictionary to calculate next values
+        prediction_dict = {}
+        next_variation_dict = {}
+
+        # Creation of the dictionary to advise Buy or Sell
+        BS_dict = {}
+
+        # Prediction dictionary filling
+        for company in self.df.index:
+            values_list = self.df.loc[company,:].to_list()
+
+            # calculate next value
+            variance = np.var(values_list)
+            mean = np.mean(values_list)
+
+            prediction_dict[company] = (random.choice([-1, 0, 1])) * variance + mean
+            if values_list[-1] > 0:
+                next_variation_dict[company] = prediction_dict[company] / values_list[-1]
+            else:
+                next_variation_dict[company] = 1
+
+        # Creation of the dictionary to advise Buy or Sell
+        if len(self.companies_list) > 1:
+            avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+        else:
+            avg_next_variation = 1        
+        
+        # Buy or Sell dictionary filling
+        for company in self.companies_list:
+            # Condition to buy or Sell            
+            if next_variation_dict[company] > avg_next_variation:
+                BS_dict[company] = "Buy"
+
+            else:
+                BS_dict[company] = "Sell"
+
+            # Specific rules
+            if add_specific_rules:
+                # Sell after a high rise
+                if values_list[-1] > sell_after_high_rise_ratio * values_list[-2]:
+                    BS_dict[company] = "Sell"
+
+                # Sell after a high loss
+                if values_list[-1] < values_list[-2]/sell_after_high_loss_ratio:
+                    BS_dict[company] = "Sell"
+
+                # Stagnation
+                if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
+                    BS_dict[company] = "Sell"
+        
+        return(BS_dict, prediction_dict, next_variation_dict)
 
 if __name__ == "__main__":
     study_length = 10

@@ -4,9 +4,9 @@
     "trend_length": 8,
     "study_length": 500,
     "initial_investment": 5000,
-    "transaction_fees_percentage": 0.5,
-    "ratio_of_gain_to_save": 0.1,
-    "ratio_max_investment_per_value": 0.15,
+    "transaction_fees_percentage": 1,
+    "ratio_of_gain_to_save": 0,
+    "ratio_max_investment_per_value": 0.25,
     "BS_deals_print": false,
     "Optimization_run": false,
     "Companies_list_path": "\\resources\\NASDAQ_Companies_List.csv",
@@ -19,7 +19,9 @@
     "Models_to_use":{
       "trend": false,
       "graduated_weights": false,
-      "NN": true
-    }
+      "NN": false,
+      "random_walks": true
+    },
+    "allow_loss": true
   }
   

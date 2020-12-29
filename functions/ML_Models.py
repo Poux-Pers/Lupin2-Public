@@ -29,6 +29,7 @@ with open(os.getcwd()+'\\parameters\\Parameters.json', 'r') as json_file:
 # -------------------- 
 
 class ML_Models():
+    
     def __init__(self, Parameters):        
         self.mesh = Parameters['Mesh']
         self.hist = pd.DataFrame([])
