@@ -10,6 +10,7 @@ import keras
 import numpy as np
 import pandas as pd
 import yfinance as yf
+import tensorflow as tf
 
 from tqdm.auto import tqdm
 from keras.models import Model, Sequential
@@ -57,7 +58,7 @@ class ML_Models():
         model.add(Dense(1, activation='sigmoid'))
 
         # Compile the keras model
-        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 
         # Fit the keras model on the dataset
         model.fit(X, y, epochs=15, batch_size=10, verbose=2)
@@ -86,18 +87,22 @@ class ML_Models():
         return(o)
     
     def train_TCN(self, dataset):
-        # Define input and output
-        X = dataset.loc[:, dataset.columns != 'prediction']
-        y = dataset['prediction']
+        # Columns creation
+        columns = []
+        for i in range(self.ML_trend_length):
+            columns.append('Day_'+str(i+1))
 
-        print(X, y)
+        # Define input and output
+        X = dataset.loc[:, columns]
+        y = dataset['prediction']
+        #dict_slices = tf.data.Dataset.from_tensor_slices((X.to_dict('list'), y.values)).batch(self.ML_trend_length)
+        
 
         # Define the nb of layers to adapt to the parameters        
         nb_layers = int(np.log(self.ML_trend_length)/np.log(2))
 
         # Define the tcn model
         inputs = Input(shape=(self.ML_trend_length,1))
-
 
         x = self.ResBlock(inputs,filters=2**nb_layers,kernel_size=3,dilation_rate=1)
         for i in range(nb_layers-3):
@@ -107,10 +112,10 @@ class ML_Models():
         model = Model(inputs, x)
 
         # Compile the tcn model
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 
         # Train the tcn model on the dataset
-        model.fit(X, y, epochs=15, batch_size=100)
+        model.fit(dict_slices, epochs=15, batch_size=100)
 
         # evaluate the keras model
         _, accuracy = model.evaluate(X, y)

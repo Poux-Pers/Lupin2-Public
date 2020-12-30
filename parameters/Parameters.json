@@ -23,8 +23,8 @@
       "graduated_weights": false,
       "random_walks": false,
       "three_in_row": false,
-      "NN": true,
-      "TCN": false      
+      "NN": false,
+      "TCN": true      
     },
     "allow_loss": true
   }
