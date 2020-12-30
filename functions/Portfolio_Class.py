@@ -118,7 +118,7 @@ class Portfolio_class():
         # Visual feedback
         print('Portfolio simulation in progress')
 
-        for day in tqdm(range(self.trend_length, len(dataset.columns.to_list()))):
+        for day in tqdm(range(self.ML_trend_length, len(dataset.columns.to_list()))):
             # Reinitialization
             BS_dict_list = []
             prediction_dict_list = []
@@ -129,7 +129,7 @@ class Portfolio_class():
             medium_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
 
             # Accuracy measurment (R²)
-            if day != self.trend_length:
+            if day != self.ML_trend_length:
                 for company in self.companies_list:
                     #print('Company: ', company)
                     #print('Prediction: ', prediction_dict[company])
