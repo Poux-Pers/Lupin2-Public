@@ -195,7 +195,7 @@ class BuySell():
             ML_Models(Parameters).train_NN(ML_dataset)
 
         # Load model
-        model = keras.models.load_model(os.getcwd()+self.NN_model_path)
+        model = keras.models.load_model(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))
 
         # Prediction dictionary filling
         for company in self.companies_list:
@@ -392,7 +392,7 @@ class BuySell():
             ML_Models(Parameters).train_TCN(ML_dataset)
 
         # Load model
-        model = keras.models.load_model(os.getcwd()+self.TCN_model_path)
+        model = keras.models.load_model(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
 
         # Prediction dictionary filling
         for company in self.companies_list:

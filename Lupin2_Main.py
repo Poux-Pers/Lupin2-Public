@@ -214,6 +214,7 @@ if __name__ == "__main__":
 # Quantdom project
 # Identification de valeurs refuge
 # trust indice based on the historical R² of the company (mainly for the full)
+# predict multiple companiesd at the same time
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
