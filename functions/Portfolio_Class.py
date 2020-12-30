@@ -43,6 +43,7 @@ class Portfolio_class():
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
         self.models_to_use = Parameters['Models_to_use']
         self.allow_loss = Parameters['allow_loss']
+        self.ML_trend_length = Parameters['ML_trend_length']
 
     def create(self):
         # This function will create a portfolio structure if it doesn't already exists
@@ -88,8 +89,8 @@ class Portfolio_class():
             'ROI': ROI,
             'Spending Money': portfolio['Money']['Spending Money'],
             'Savings': portfolio['Money']['Savings'],
-            'Shares value':sum([portfolio['Shares']['Count'][x]*int(dataset.loc[x,:].to_list()[-1]*1000)/1000 for x in self.companies_list]),
-            'Fees paid': portfolio['Money']['Transaction_fees_paid']
+            'Shares value':sum([portfolio['Shares']['Count'][x] * int(dataset.loc[x,:].to_list()[-1] * 1000) / 1000 for x in self.companies_list]),
+            'Fees paid': int(portfolio['Money']['Transaction_fees_paid'] * 1000) / 1000
         }
 
         return(Savings)
@@ -125,6 +126,7 @@ class Portfolio_class():
 
             # Reducing the dataset to the trend period studied and the companies in the companies list
             small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
+            medium_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
 
             # Accuracy measurment (R²)
             if day != self.trend_length:
@@ -140,7 +142,10 @@ class Portfolio_class():
             # Getting the list of the values to buy and their prediction
             for model in self.models_to_use:
                 if self.models_to_use[model]:
-                    BS_dict, prediction_dict, next_variation_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
+                    if model not in ['NN', 'TCN']:
+                        BS_dict, prediction_dict, next_variation_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
+                    else:
+                        BS_dict, prediction_dict, next_variation_dict = eval('BuySell(medium_dataset, Parameters).'+model+'()')
 
                     # Add the results to the lists if we want to combine some models
                     BS_dict_list.append(BS_dict)

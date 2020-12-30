@@ -2,6 +2,7 @@
     "Update_Values": false,
     "Mesh": "1d",
     "trend_length": 5,
+    "ML_trend_length": 50,
     "study_length": 500,
     "initial_investment": 5000,
     "transaction_fees_percentage": 0.5,
@@ -14,15 +15,17 @@
     "ML_dataset_path": "\\resources\\ML_Dataset.csv",
     "ML_dataset_parameters_path": "\\parameters\\ML_Dataset_Parameters.json",
     "NN_model_path" : "\\models\\NN",
+    "TCN_model_path" : "\\models\\TCN",
     "Send_to_ES": false,
     "Plot_Graph": true,
     "Models_to_use":{
-      "trend": true,
+      "trend": false,
       "graduated_weights": false,
-      "NN": false,
       "random_walks": false,
-      "three_in_row": false
+      "three_in_row": false,
+      "NN": true,
+      "TCN": false      
     },
-    "allow_loss": false
+    "allow_loss": true
   }
   

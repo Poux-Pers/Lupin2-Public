@@ -44,6 +44,7 @@ class BuySell():
         self.df = short_hist_dataframe
         self.mesh = Parameters['Mesh']
         self.trend_length = Parameters['trend_length']
+        self.ML_trend_length = Parameters['ML_trend_length']
         self.initial_investment = Parameters['initial_investment']
         self.ratio_of_gain_to_save = Parameters['ratio_of_gain_to_save']
         self.ratio_max_investment_per_value = Parameters['ratio_max_investment_per_value']
@@ -175,7 +176,7 @@ class BuySell():
         with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
             ML_Parameters = json.load(json_file)
 
-        if ML_Parameters['trend_length'] != self.trend_length:
+        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
             # Hist loading and dataset creation
             my_hist = Dataset(Parameters)
             my_hist.load()

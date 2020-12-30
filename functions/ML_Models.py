@@ -12,8 +12,8 @@ import pandas as pd
 import yfinance as yf
 
 from tqdm.auto import tqdm
-from keras.models import Sequential
-from keras.layers import Dense
+from keras.models import Model, Sequential
+from keras.layers import add,Input,Conv1D,Activation,Flatten,Dense
 
 
 # -------------------- 
@@ -35,8 +35,10 @@ class ML_Models():
         self.hist = pd.DataFrame([])
         self.hist_path = Parameters['hist_path']
         self.ML_dataset_path = Parameters['ML_dataset_path']   
-        self.NN_model_path = Parameters['NN_model_path']   
+        self.NN_model_path = Parameters['NN_model_path']
+        self.TCN_model_path = Parameters['TCN_model_path']
         self.trend_length = Parameters['trend_length']
+        self.ML_trend_length = Parameters['ML_trend_length']
         self.date_name = ''
         self.companies_list_path = Parameters['Companies_list_path']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()        
@@ -49,7 +51,7 @@ class ML_Models():
         
         # Define the keras model
         model = Sequential()
-        model.add(Dense(12, input_dim=self.trend_length, activation='relu'))
+        model.add(Dense(12, input_dim=self.ML_trend_length, activation='relu'))
         model.add(Dense(8, activation='relu'))
         model.add(Dense(8, activation='relu'))
         model.add(Dense(1, activation='sigmoid'))
@@ -58,7 +60,7 @@ class ML_Models():
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
         # Fit the keras model on the dataset
-        model.fit(X, y, epochs=15, batch_size=10)
+        model.fit(X, y, epochs=15, batch_size=10, verbose=2)
 
         # evaluate the keras model
         _, accuracy = model.evaluate(X, y)
@@ -70,12 +72,60 @@ class ML_Models():
             json.dump(self.parameters, json_file)
 
         return()
+    
+    def ResBlock(self, x, filters, kernel_size, dilation_rate):
+        # Residual block
+        r=Conv1D(filters,kernel_size,padding='same',dilation_rate=dilation_rate,activation='relu')(x) #first convolution
+        r=Conv1D(filters,kernel_size,padding='same',dilation_rate=dilation_rate)(r) #Second convolution
+        if x.shape[-1]==filters:
+            shortcut=x
+        else:
+            shortcut=Conv1D(filters,kernel_size,padding='same')(x) #shortcut (shortcut)
+        o=add([r,shortcut])
+        o=Activation('relu')(o) #Activation function
+        return(o)
+    
+    def train_TCN(self, dataset):
+        # Define input and output
+        X = dataset.loc[:, dataset.columns != 'prediction']
+        y = dataset['prediction']
+
+        # Define the nb of layers to adapt to the parameters        
+        nb_layers = int(np.log(self.ML_trend_length)/np.log(2))
+
+        # Define the tcn model
+        inputs = Input(shape=(self.ML_trend_length,1))
+
+
+        x = self.ResBlock(inputs,filters=2**nb_layers,kernel_size=3,dilation_rate=1)
+        for i in range(nb_layers-3):
+            x = self.ResBlock(x,filters=2**(nb_layers-i),kernel_size=3,dilation_rate=2**(i+1))
+        x = Flatten()(x)
+        x = Dense(10,activation='softmax')(x)
+        model = Model(input=inputs,output=x)
+
+        # Compile the tcn model
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+        # Train the tcn model on the dataset
+        model.fit(X, y, epochs=15, batch_size=100)
+
+        # evaluate the keras model
+        _, accuracy = model.evaluate(X, y)
+        print('Accuracy: %.2f' % (accuracy*100))
+
+        # Save the model and the parameters used
+        model.save(os.getcwd()+self.TCN_model_path)
+        with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+            json.dump(self.parameters, json_file)
+
+        return()
 
 
 if __name__ == "__main__":
     # Columns creation
     columns = []
-    for i in range(Parameters['trend_length']):
+    for i in range(Parameters['ML_trend_length']):
         columns.append('Day_'+str(i+1))
     columns.append('prediction')
     # Add columns
@@ -91,3 +141,4 @@ if __name__ == "__main__":
 
 # ----- COMMENTS -----
 # https://machinelearningmastery.com/tutorial-first-neural-network-python-keras/
+# TCN model is a 
