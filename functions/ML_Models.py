@@ -46,8 +46,13 @@ class ML_Models():
         self.parameters = Parameters
 
     def train_NN(self, dataset):
+        # Columns creation
+        columns = []
+        for i in range(self.ML_trend_length):
+            columns.append('Day_'+str(i+1))
+
         # Define input and output
-        X = dataset.loc[:, dataset.columns != 'prediction']
+        X = dataset.loc[:, columns]
         y = dataset['prediction']
         
         # Define the keras model
@@ -95,7 +100,6 @@ class ML_Models():
         # Define input and output
         X = dataset.loc[:, columns]
         y = dataset['prediction']
-        #dict_slices = tf.data.Dataset.from_tensor_slices((X.to_dict('list'), y.values)).batch(self.ML_trend_length)
         
 
         # Define the nb of layers to adapt to the parameters        
@@ -109,6 +113,7 @@ class ML_Models():
             x = self.ResBlock(x,filters=2**(nb_layers-i),kernel_size=3,dilation_rate=2**(i+1))
         x = Flatten()(x)
         x = Dense(10,activation='softmax')(x)
+        x = Dense(1, activation='sigmoid')(x)
         model = Model(inputs, x)
 
         # Compile the tcn model
