@@ -43,6 +43,7 @@ class Portfolio_class():
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
         self.models_to_use = Parameters['Models_to_use']
         self.allow_loss = Parameters['allow_loss']
+        self.ML_trend_length = Parameters['ML_trend_length']
 
     def create(self):
         # This function will create a portfolio structure if it doesn't already exists
@@ -52,7 +53,7 @@ class Portfolio_class():
 
         else:
             self.portfolio = {}
-            self.portfolio['Money'] = {'Spending Money': self.initial_investment, 'Savings': 0}
+            self.portfolio['Money'] = {'Spending Money': self.initial_investment, 'Savings': 0, 'Transaction_fees_paid': 0}
             self.portfolio['Shares'] = {'Count': {}, 'Buy_Value': {}, 'Current_Value':{}}
             self.portfolio['Timestamp'] = datetime.datetime.now()
 
@@ -84,11 +85,12 @@ class Portfolio_class():
         ROI = (portfolio['Money']['Spending Money'] + portfolio['Money']['Savings'] + sum([portfolio['Shares']['Count'][x]*int(dataset.loc[x,:].to_list()[-1]*1000)/1000 for x in self.companies_list]))/self.initial_investment
 
         Savings = {
-            'Total value': ROI *self.initial_investment,
+            'Total value': ROI * self.initial_investment,
             'ROI': ROI,
             'Spending Money': portfolio['Money']['Spending Money'],
             'Savings': portfolio['Money']['Savings'],
-            'Shares value':sum([portfolio['Shares']['Count'][x]*int(dataset.loc[x,:].to_list()[-1]*1000)/1000 for x in self.companies_list])
+            'Shares value':sum([portfolio['Shares']['Count'][x] * int(dataset.loc[x,:].to_list()[-1] * 1000) / 1000 for x in self.companies_list]),
+            'Fees paid': int(portfolio['Money']['Transaction_fees_paid'] * 1000) / 1000
         }
 
         return(Savings)
@@ -116,7 +118,7 @@ class Portfolio_class():
         # Visual feedback
         print('Portfolio simulation in progress')
 
-        for day in tqdm(range(self.trend_length, len(dataset.columns.to_list()))):
+        for day in tqdm(range(self.ML_trend_length, len(dataset.columns.to_list()))):
             # Reinitialization
             BS_dict_list = []
             prediction_dict_list = []
@@ -124,9 +126,10 @@ class Portfolio_class():
 
             # Reducing the dataset to the trend period studied and the companies in the companies list
             small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
+            medium_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
 
             # Accuracy measurment (R²)
-            if day != self.trend_length:
+            if day != self.ML_trend_length:
                 for company in self.companies_list:
                     #print('Company: ', company)
                     #print('Prediction: ', prediction_dict[company])
@@ -139,7 +142,10 @@ class Portfolio_class():
             # Getting the list of the values to buy and their prediction
             for model in self.models_to_use:
                 if self.models_to_use[model]:
-                    BS_dict, prediction_dict, next_variation_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
+                    if model not in ['NN', 'TCN']:
+                        BS_dict, prediction_dict, next_variation_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
+                    else:
+                        BS_dict, prediction_dict, next_variation_dict = eval('BuySell(medium_dataset, Parameters).'+model+'()')
 
                     # Add the results to the lists if we want to combine some models
                     BS_dict_list.append(BS_dict)
@@ -174,7 +180,7 @@ class Portfolio_class():
 
             # Current value update/buy/sell all in a loop to evaluate the current price only once since you can't buy and sell on at the same time
             for company in sorted_next_variation_dict:
-                symbol_current_value = int(small_dataset.loc[company,:].to_list()[-1]*1000)/1000
+                symbol_current_value = int(small_dataset.loc[company,:].to_list()[-1] * 1000) / 1000
                 Portfolio['Shares']['Current_Value'][company] = Portfolio['Shares']['Count'][company] * symbol_current_value
 
                 # ----- BUYING ------
@@ -186,9 +192,10 @@ class Portfolio_class():
                     
                     if nb_symbols_to_buy >=1:
                         # Portfolio update
-                        Portfolio['Money']['Spending Money'] -= buy_value * (100 + self.transaction_fees_percentage)/100
+                        Portfolio['Money']['Spending Money'] -= buy_value * (100 + self.transaction_fees_percentage) / 100
                         Portfolio['Shares']['Count'][company] += nb_symbols_to_buy
                         Portfolio['Shares']['Buy_Value'][company] += buy_value
+                        Portfolio['Money']['Transaction_fees_paid'] += buy_value * self.transaction_fees_percentage / 100
                         
                         # Print deal details
                         deal_str = str(int(nb_symbols_to_buy))+' x '+company+' bought at '+str(symbol_current_value)+' (Total: '+str(buy_value)+'$ - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'
@@ -202,15 +209,16 @@ class Portfolio_class():
                 if BS_dict[company] == 'Sell' and nb_symbols_to_sell >= 1 and symbol_current_value > 0:
                     # Sell all
                     
-                    sell_value = int(nb_symbols_to_sell*symbol_current_value*1000)/1000
+                    sell_value = int(nb_symbols_to_sell*symbol_current_value * 1000) / 1000
                     profit = sell_value - Portfolio['Shares']['Buy_Value'][company]
                     
                     # Portfolio update
                     if sell_value*(100-self.transaction_fees_percentage)/100 > Portfolio['Shares']['Buy_Value'][company] or self.allow_loss:
-                        Portfolio['Money']['Spending Money'] += sell_value*(100-self.transaction_fees_percentage)/100 - profit * self.ratio_of_gain_to_save
-                        Portfolio['Money']['Savings'] += profit*self.ratio_of_gain_to_save
+                        Portfolio['Money']['Spending Money'] += sell_value * ( 100 - self.transaction_fees_percentage) / 100 - profit * self.ratio_of_gain_to_save
+                        Portfolio['Money']['Savings'] += profit * self.ratio_of_gain_to_save
                         Portfolio['Shares']['Count'][company] -= nb_symbols_to_sell
                         Portfolio['Shares']['Buy_Value'][company] -= sell_value
+                        Portfolio['Money']['Transaction_fees_paid'] += sell_value * self.transaction_fees_percentage / 100
 
                         # Print deal details
                         deal_str = str(int(nb_symbols_to_sell))+' x '+company+' sold at '+str(symbol_current_value)+' (Profit: '+str(int(profit*1000)/1000)+'$ - Cash: '+str(int(Portfolio['Money']['Spending Money']*1000)/1000)+'$'

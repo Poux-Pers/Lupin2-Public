@@ -1,11 +1,12 @@
 {
     "Update_Values": false,
     "Mesh": "1d",
-    "trend_length": 8,
-    "study_length": 500,
+    "trend_length": 5,
+    "ML_trend_length": 32,
+    "study_length": 532,
     "initial_investment": 5000,
-    "transaction_fees_percentage": 1,
-    "ratio_of_gain_to_save": 0,
+    "transaction_fees_percentage": 0.5,
+    "ratio_of_gain_to_save": 0.1,
     "ratio_max_investment_per_value": 0.25,
     "BS_deals_print": false,
     "Optimization_run": false,
@@ -14,13 +15,16 @@
     "ML_dataset_path": "\\resources\\ML_Dataset.csv",
     "ML_dataset_parameters_path": "\\parameters\\ML_Dataset_Parameters.json",
     "NN_model_path" : "\\models\\NN",
+    "TCN_model_path" : "\\models\\TCN",
     "Send_to_ES": false,
     "Plot_Graph": true,
     "Models_to_use":{
       "trend": false,
       "graduated_weights": false,
-      "NN": false,
-      "random_walks": true
+      "random_walks": false,
+      "three_in_row": false,
+      "NN": true,
+      "TCN": false      
     },
     "allow_loss": true
   }

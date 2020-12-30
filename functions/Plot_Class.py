@@ -34,10 +34,10 @@ class Plot():
         fig, axs = plt.subplots(4, 1)
         fig.suptitle('Savings over time')
 
-        x_list = dataset.columns.to_list()[self.Parameters['trend_length']:]
+        x_list = dataset.columns.to_list()[self.Parameters['ML_trend_length']:]
 
         # Sub plot for the sum of the symbols
-        axs[0].plot(x_list, dataset.iloc[-1].to_list()[self.Parameters['trend_length']:], 'purple', label='NASDAQ')
+        axs[0].plot(x_list, dataset.iloc[-1].to_list()[self.Parameters['ML_trend_length']:], 'purple', label='NASDAQ')
         
         axs[1].plot(x_list, self.list_Cash, 'r', label='Cash')
         axs[1].plot(x_list, self.list_Savings, 'b', label='Bank')
