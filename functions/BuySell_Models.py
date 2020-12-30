@@ -30,8 +30,8 @@ with open(os.getcwd()+'\\parameters\\Parameters.json', 'r') as json_file:
 # -------------------- 
 add_specific_rules = True
 sell_after_stagnation = {'y/n': True, 'nb_days': 4}
-sell_after_high_rise_ratio = 1.5
-sell_after_high_loss_ratio = 1.5
+sell_after_high_rise_ratio = 2
+sell_after_high_loss_ratio = 1.2
 
 
 # -------------------- 
@@ -88,8 +88,11 @@ class BuySell():
             if next_variation_dict[company] > avg_next_variation:
                 BS_dict[company] = "Buy"
 
-            else:
+            elif next_variation_dict[company] < avg_next_variation:
                 BS_dict[company] = "Sell"
+
+            else:
+                BS_dict[company] = "Hold"
 
             # Specific rules
             if add_specific_rules:
@@ -138,8 +141,11 @@ class BuySell():
             if next_variation_dict[company] > avg_next_variation:
                 BS_dict[company] = "Buy"
 
-            else:
+            elif next_variation_dict[company] < avg_next_variation:
                 BS_dict[company] = "Sell"
+
+            else:
+                BS_dict[company] = "Hold"
 
             # Specific rules
             if add_specific_rules:
@@ -210,9 +216,12 @@ class BuySell():
             if next_variation_dict[company] > avg_next_variation:
                 BS_dict[company] = "Buy"
 
-            else:
+            elif next_variation_dict[company] < avg_next_variation:
                 BS_dict[company] = "Sell"
 
+            else:
+                BS_dict[company] = "Hold"
+                
             # Specific rules
             if add_specific_rules:
                 # Sell after a high rise
@@ -263,8 +272,73 @@ class BuySell():
             if next_variation_dict[company] > avg_next_variation:
                 BS_dict[company] = "Buy"
 
-            else:
+            elif next_variation_dict[company] < avg_next_variation:
                 BS_dict[company] = "Sell"
+
+            else:
+                BS_dict[company] = "Hold"
+
+            # Specific rules
+            if add_specific_rules:
+                # Sell after a high rise
+                if values_list[-1] > sell_after_high_rise_ratio * values_list[-2]:
+                    BS_dict[company] = "Sell"
+
+                # Sell after a high loss
+                if values_list[-1] < values_list[-2]/sell_after_high_loss_ratio:
+                    BS_dict[company] = "Sell"
+
+                # Stagnation
+                if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
+                    BS_dict[company] = "Sell"
+        
+        return(BS_dict, prediction_dict, next_variation_dict)
+
+    def three_in_row(self):
+        # Creation of the dictionary to calculate next values
+        prediction_dict = {}
+        next_variation_dict = {}
+
+        # Creation of the dictionary to advise Buy or Sell
+        BS_dict = {}
+
+        # Prediction dictionary filling
+        for company in self.df.index:
+            values_list = self.df.loc[company,:].to_list()
+
+            # calculate next value
+            variance = np.var(values_list[-3:])
+
+            # Decide the next value based on the last 3 values
+            if values_list[-3] < values_list[-2] < values_list[-1]:
+                prediction_dict[company] = values_list[-1] + variance
+            elif values_list[-3] > values_list[-2] > values_list[-1]:
+                prediction_dict[company] = values_list[-1] - variance
+            else:
+                prediction_dict[company] = values_list[-1]
+
+            if values_list[-1] > 0:
+                next_variation_dict[company] = prediction_dict[company] / values_list[-1]
+            else:
+                next_variation_dict[company] = 1
+
+        # Creation of the dictionary to advise Buy or Sell
+        if len(self.companies_list) > 1:
+            avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+        else:
+            avg_next_variation = 1        
+        
+        # Buy or Sell dictionary filling
+        for company in self.companies_list:
+            # Condition to buy or Sell            
+            if next_variation_dict[company] > avg_next_variation:
+                BS_dict[company] = "Buy"
+
+            elif next_variation_dict[company] < avg_next_variation:
+                BS_dict[company] = "Sell"
+
+            else:
+                BS_dict[company] = "Hold"
 
             # Specific rules
             if add_specific_rules:

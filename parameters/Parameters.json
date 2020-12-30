@@ -1,10 +1,10 @@
 {
     "Update_Values": false,
     "Mesh": "1d",
-    "trend_length": 8,
+    "trend_length": 5,
     "study_length": 500,
     "initial_investment": 5000,
-    "transaction_fees_percentage": 1,
+    "transaction_fees_percentage": 0.5,
     "ratio_of_gain_to_save": 0,
     "ratio_max_investment_per_value": 0.25,
     "BS_deals_print": false,
@@ -17,11 +17,12 @@
     "Send_to_ES": false,
     "Plot_Graph": true,
     "Models_to_use":{
-      "trend": false,
+      "trend": true,
       "graduated_weights": false,
       "NN": false,
-      "random_walks": true
+      "random_walks": false,
+      "three_in_row": false
     },
-    "allow_loss": true
+    "allow_loss": false
   }
   

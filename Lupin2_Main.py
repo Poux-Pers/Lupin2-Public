@@ -199,13 +199,11 @@ if __name__ == "__main__":
 # TODO
 # Optimisation des paremètre avec affichage graphique
 # Deals audit trail - Best deals, worst deals
-# Inflation - Bank %
-# Holding shares cost
+# Inflation - Bank % - Holding shares cost
 # If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
 # Comparainson to rating agencies
 # save B/S dict 
 # Autres fonctions B/S
-# - Zig zag
 # - Trend identification
 # - TCN (would need to differentiate trend_length and the stat))set size)
 # - Buy for 3 increase in a row, sell for 3 loss in a row
@@ -215,8 +213,7 @@ if __name__ == "__main__":
 # https://commodity.com/technical-analysis/
 # Quantdom project
 # Identification de valeurs refuge
-# trust indice based on the historical R² of the company
-# Count the money lost in deals 
+# trust indice based on the historical R² of the company (mainly for the full)
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
