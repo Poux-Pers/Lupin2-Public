@@ -67,7 +67,7 @@ class ML_Models():
         print('Accuracy: %.2f' % (accuracy*100))
 
         # Save the model and the parameters used
-        model.save(os.getcwd()+self.NN_model_path)
+        model.save(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))
         with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
             json.dump(self.parameters, json_file)
 
@@ -90,6 +90,8 @@ class ML_Models():
         X = dataset.loc[:, dataset.columns != 'prediction']
         y = dataset['prediction']
 
+        print(X, y)
+
         # Define the nb of layers to adapt to the parameters        
         nb_layers = int(np.log(self.ML_trend_length)/np.log(2))
 
@@ -102,7 +104,7 @@ class ML_Models():
             x = self.ResBlock(x,filters=2**(nb_layers-i),kernel_size=3,dilation_rate=2**(i+1))
         x = Flatten()(x)
         x = Dense(10,activation='softmax')(x)
-        model = Model(input=inputs,output=x)
+        model = Model(inputs, x)
 
         # Compile the tcn model
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -115,7 +117,7 @@ class ML_Models():
         print('Accuracy: %.2f' % (accuracy*100))
 
         # Save the model and the parameters used
-        model.save(os.getcwd()+self.TCN_model_path)
+        model.save(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
         with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
             json.dump(self.parameters, json_file)
 

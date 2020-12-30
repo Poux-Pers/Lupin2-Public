@@ -55,12 +55,14 @@ class Dataset():
         self.mesh = Parameters['Mesh']
         self.hist = pd.DataFrame([])
         self.hist_path = Parameters['hist_path']
-        self.ML_dataset_path = Parameters['ML_dataset_path']    
+        self.ML_dataset_path = Parameters['ML_dataset_path']
         self.trend_length = Parameters['trend_length']
+        self.ML_trend_length = Parameters['ML_trend_length']
         self.parameters = Parameters
         self.date_name = ''
         self.companies_list_path = Parameters['Companies_list_path']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
+        
 
     def load(self):
         
@@ -202,18 +204,18 @@ class Dataset():
 
         # Columns creation
         columns = []
-        for i in range(self.trend_length):
+        for i in range(self.ML_trend_length):
             columns.append('Day_'+str(i+1))
         columns.append('prediction')
 
-        for day in tqdm(range(self.trend_length+1, len(dataset.columns.to_list())-1)):
+        for day in tqdm(range(self.ML_trend_length+1, len(dataset.columns.to_list())-1)):
             # Reinitialization
             BS_dict_list = []
             prediction_dict_list = []
 
             # Reducing the dataset to the trend period studied and the companies in the companies list TODO add string integration for ML 
             #small_dataset = dataset[['Company']+dataset.columns[day-self.trend_length:day+1].to_list()].fillna(0)
-            small_dataset = dataset[dataset.columns[day-self.trend_length:day+1].to_list()]
+            small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day+1].to_list()]
 
             # Rename columns
             small_dataset.columns = columns

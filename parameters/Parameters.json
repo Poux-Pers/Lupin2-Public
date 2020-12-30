@@ -2,7 +2,7 @@
     "Update_Values": false,
     "Mesh": "1d",
     "trend_length": 5,
-    "ML_trend_length": 50,
+    "ML_trend_length": 32,
     "study_length": 100,
     "initial_investment": 5000,
     "transaction_fees_percentage": 0.5,
