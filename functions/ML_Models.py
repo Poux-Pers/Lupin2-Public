@@ -58,7 +58,7 @@ class ML_Models():
         model.add(Dense(1, activation='sigmoid'))
 
         # Compile the keras model
-        model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+        model.compile(loss=tf.losses.MeanSquaredError(), optimizer='adam', metrics=[tf.metrics.MeanAbsoluteError()])
 
         # Fit the keras model on the dataset
         model.fit(X, y, epochs=15, batch_size=10, verbose=2)
@@ -112,10 +112,10 @@ class ML_Models():
         model = Model(inputs, x)
 
         # Compile the tcn model
-        model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+        model.compile(loss=tf.losses.MeanSquaredError(), optimizer='adam', metrics=[tf.metrics.MeanAbsoluteError()])
 
         # Train the tcn model on the dataset
-        model.fit(dict_slices, epochs=15, batch_size=100)
+        model.fit(X, y, epochs=15, batch_size=100)
 
         # evaluate the keras model
         _, accuracy = model.evaluate(X, y)
