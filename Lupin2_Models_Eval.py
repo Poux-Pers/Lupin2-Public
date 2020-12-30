@@ -42,7 +42,7 @@ with open(os.getcwd()+'\\parameters\\Parameters.json', 'r') as json_file:
     Parameters = json.load(json_file)
 
 # Opening the log file
-sys.stdout = open(os.getcwd()+'\\models\\logs\\Model_Eval_'+str(Parameters['trend_length'])+'.txt', 'w')
+sys.stdout = open(os.getcwd()+'\\models\\logs\\Model_Eval_'+str(Parameters['trend_length'])+'-'+str(Parameters['ML_trend_length'])+'-'+str(Parameters['study_length'])+'.txt', 'w')
 
 
 # -------------------- 
@@ -77,6 +77,7 @@ dataset = full_hist.new_format(Parameters['study_length']).fillna(0)
 # ------- RUN -------- 
 # Print parameters
 print('##### Trend length: '+str(Parameters['trend_length'])+' #####')
+print('##### ML Trend length: '+str(Parameters['ML_trend_length'])+' #####')
 print('##### Study length: '+str(Parameters['study_length'])+' #####')
 
 # Trend
@@ -90,8 +91,8 @@ Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- Trend -----')
-print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 
 # Graduated wheights
 # Reset other models
@@ -104,8 +105,8 @@ Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- Graduated wheights -----')
-print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 
 # Trend + Graduated wheights
 # Reset other models
@@ -119,8 +120,8 @@ Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- Trend + Graduated wheights -----')
-print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 
 # NN
 # Reset other models
@@ -133,8 +134,8 @@ Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- NN -----')
-print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 
 # Random walks
 # Reset other models
@@ -147,8 +148,8 @@ Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- Random walks -----')
-print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 
 # 3 in a row
 # Reset other models
@@ -161,9 +162,22 @@ Portfolio.reset()
 last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
 print('----- 3 in a row -----')
-print('----- Average R2: '+str(R2)+' -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 
+# TCN
+# Reset other models
+for model in Parameters['Models_to_use']:
+    Parameters['Models_to_use'][model] = False
+
+Parameters['Models_to_use']['TCN'] = True
+Portfolio = Portfolio_class(Parameters)
+Portfolio.reset()
+last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+print('----- TCN -----')
+print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
 
 # Close the log file
 sys.stdout.close()

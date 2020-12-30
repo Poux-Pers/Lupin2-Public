@@ -402,7 +402,7 @@ class BuySell():
             normalizer = max(values_list) * 2
 
             # calculate next value for accuracy 
-            prediction_dict[company] = model.predict(np.array([[x/normalizer for x in values_list]], dtype=float)) * normalizer[0][0]
+            prediction_dict[company] = model.predict(np.array([[x/normalizer for x in values_list]], dtype=float)) * normalizer
 
             if values_list[-1] > 0:
                 next_variation_dict[company] = prediction_dict[company] / values_list[-1]
