@@ -16,6 +16,8 @@ from tqdm.auto import tqdm
 from keras.models import Model, Sequential
 from keras.layers import add,Input,Conv1D,Activation,Flatten,Dense
 
+# ---- FUNCTIONS -----
+from functions.Dataset_Class import Dataset
 
 # -------------------- 
 # PARAMETERS
@@ -44,6 +46,7 @@ class ML_Models():
         self.companies_list_path = Parameters['Companies_list_path']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()        
         self.parameters = Parameters
+        self.ML_dataset_parameters_path = Parameters['ML_dataset_parameters_path']
 
     def train_NN(self, dataset):
         # Columns creation
@@ -79,6 +82,27 @@ class ML_Models():
 
         return()
     
+    def verify_train_NN(self):
+        # Load parameters used during model training and if trend different than current param re-create model and train and save param
+        with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
+            ML_Parameters = json.load(json_file)
+
+        # Verify if the dataset has to be redone
+        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
+            # Hist loading and dataset creation
+            my_hist = Dataset(Parameters)
+            my_hist.load()
+            ML_dataset = my_hist.new_format(len(my_hist.hist))
+
+            # Create the dataset
+            ML_dataset = my_hist.create_ML_dataset(ML_dataset)
+        else:
+            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
+
+        if not(os.path.exists(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))):
+            # Train the dataset
+            self.train_NN(ML_dataset)
+
     def ResBlock(self, x, filters, kernel_size, dilation_rate):
         # Residual block
         r=Conv1D(filters,kernel_size,padding='same',dilation_rate=dilation_rate,activation='relu')(x) #first convolution
@@ -132,6 +156,27 @@ class ML_Models():
             json.dump(self.parameters, json_file)
 
         return()
+
+    def verify_train_TCN(self):
+        # Load parameters used during model training and if trend different than current param re-create model and train and save param
+        with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
+            ML_Parameters = json.load(json_file)
+
+        # Verify if the dataset has to be redone
+        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
+            # Hist loading and dataset creation
+            my_hist = Dataset(Parameters)
+            my_hist.load()
+            ML_dataset = my_hist.new_format(len(my_hist.hist))
+
+            # Create the dataset
+            ML_dataset = my_hist.create_ML_dataset(ML_dataset)
+        else:
+            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
+
+        if not(os.path.exists(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))):
+            # Train the dataset
+            self.train_TCN(ML_dataset)
 
 
 if __name__ == "__main__":
