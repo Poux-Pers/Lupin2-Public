@@ -21,6 +21,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from tqdm.auto import tqdm
+from pycallgraph import PyCallGraph
+from pycallgraph.output import GraphvizOutput
 
 # ---- FUNCTIONS -----
 from functions.Portfolio_Class import Portfolio_class
@@ -162,6 +164,14 @@ if __name__ == "__main__":
 
         initial_investment
 
+    elif Parameters['Performance_analysis_run']:
+        print('***** BEWARE : This must be run as an administrator to fully function. *****')
+        with PyCallGraph(output=GraphvizOutput()):
+            # ------- RUN --------
+            Portfolio = Portfolio_class(Parameters)
+            Portfolio.reset()
+            last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
+
     else:
         # ------- RUN --------
         Portfolio = Portfolio_class(Parameters)
@@ -198,15 +208,13 @@ if __name__ == "__main__":
 # -------------------- 
 # TODO
 # Optimisation des paremètre avec affichage graphique
-# Deals audit trail - Best deals, worst deals
+# Deals audit trail - Best deals, worst deals - axisting file, not structured yet
 # Inflation - Bank % - Holding shares cost
-# If you ever do a prod file for 1d actualization with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
+# If you ever do a prod file for 1d actualisation with a dashboard, have a list of the B/S functions and their profitability over the preivous x days
 # Comparainson to rating agencies
 # save B/S dict 
 # Autres fonctions B/S
-# - Trend identification
-# - TCN (would need to differentiate trend_length and the stat))set size)
-# - Buy for 3 increase in a row, sell for 3 loss in a row
+# - Trend/seasonality identification
 # - Elliott waves rules
 # - ARMA
 # - GARCH
@@ -214,12 +222,13 @@ if __name__ == "__main__":
 # Quantdom project
 # Identification de valeurs refuge
 # trust indice based on the historical R² of the company (mainly for the full)
-# predict multiple companiesd at the same time
+# predict multiple companies at the same time
 # Tidy the parameters file
+# Simplify source selction
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
 # Include volume
 # (Further dev) Dashboard d'évolution des fonds avec une simulation 1min = 1 sec (plotly ?) 
 # Calculate trend compared to industry trend
-# Save in the trend the best model to describe the company stock variation
+# Save the best model to describe the company stock variation

@@ -70,7 +70,7 @@ class ML_Models():
 
         # evaluate the keras model
         _, accuracy = model.evaluate(X, y)
-        print('Accuracy: %.2f' % (accuracy*100))
+        print('Average error: %.2f' % (accuracy*100))
 
         # Save the model and the parameters used
         model.save(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))
@@ -124,7 +124,7 @@ class ML_Models():
 
         # evaluate the keras model
         _, accuracy = model.evaluate(X, y)
-        print('Accuracy: %.2f' % (accuracy*100))
+        print('Average error: %.2f' % (accuracy*100))
 
         # Save the model and the parameters used
         model.save(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
@@ -153,4 +153,4 @@ if __name__ == "__main__":
 
 # ----- COMMENTS -----
 # https://machinelearningmastery.com/tutorial-first-neural-network-python-keras/
-# TCN model is a 
+# TCN model is inspired of https://github.com/philipperemy/keras-tcn and https://www.programmersought.com/article/13674618779/
