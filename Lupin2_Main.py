@@ -225,6 +225,7 @@ if __name__ == "__main__":
 # predict multiple companies at the same time
 # Tidy the parameters file
 # Simplify source selction
+# refuse loss imputation on savings
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies

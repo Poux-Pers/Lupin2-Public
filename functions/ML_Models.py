@@ -75,10 +75,8 @@ class ML_Models():
         _, accuracy = model.evaluate(X, y)
         print('Average error: %.2f' % (accuracy*100))
 
-        # Save the model and the parameters used
+        # Save the model
         model.save(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))
-        with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
-            json.dump(self.parameters, json_file)
 
         return()
     
@@ -96,6 +94,11 @@ class ML_Models():
 
             # Create the dataset
             ML_dataset = my_hist.create_ML_dataset(ML_dataset)
+
+            # Save dataset parameters
+            with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+                json.dump(self.parameters, json_file)
+
         else:
             ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
 
@@ -125,7 +128,6 @@ class ML_Models():
         X = dataset.loc[:, columns]
         y = dataset['prediction']
         
-
         # Define the nb of layers to adapt to the parameters        
         nb_layers = int(np.log(self.ML_trend_length)/np.log(2))
 
@@ -150,10 +152,8 @@ class ML_Models():
         _, accuracy = model.evaluate(X, y)
         print('Average error: %.2f' % (accuracy*100))
 
-        # Save the model and the parameters used
+        # Save the model 
         model.save(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
-        with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
-            json.dump(self.parameters, json_file)
 
         return()
 
@@ -171,6 +171,11 @@ class ML_Models():
 
             # Create the dataset
             ML_dataset = my_hist.create_ML_dataset(ML_dataset)
+
+            # Save dataset parameters
+            with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+                json.dump(self.parameters, json_file)
+            
         else:
             ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
 

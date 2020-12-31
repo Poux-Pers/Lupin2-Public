@@ -34,6 +34,7 @@ class Portfolio_class():
     def __init__(self, Parameters):
         self.path = os.getcwd() + '\\resources\\Portfolio.json'
         self.portfolio = {}
+        self.parameters = Parameters
         self.mesh = Parameters['Mesh']
         self.trend_length = Parameters['trend_length']
         self.initial_investment = Parameters['initial_investment']
@@ -118,9 +119,9 @@ class Portfolio_class():
         
         # Train the models if needed
         if self.models_to_use['NN']:
-            ML_Models(Parameters).verify_train_NN()
+            ML_Models(self.parameters).verify_train_NN()
         elif self.models_to_use['TCN']:
-            ML_Models(Parameters).verify_train_TCN()
+            ML_Models(self.parameters).verify_train_TCN()
 
         # Visual feedback
         print('Portfolio simulation in progress')
