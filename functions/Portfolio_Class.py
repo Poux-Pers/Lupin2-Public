@@ -46,6 +46,7 @@ class Portfolio_class():
         self.models_to_use = Parameters['Models_to_use']
         self.allow_loss = Parameters['allow_loss']
         self.ML_trend_length = Parameters['ML_trend_length']
+        self.allow_loss_imputation_on_savings = Parameters['allow_loss_imputation_on_savings']
 
     def create(self):
         # This function will create a portfolio structure if it doesn't already exists
@@ -217,8 +218,15 @@ class Portfolio_class():
                     
                     # Portfolio update
                     if sell_value*(100-self.transaction_fees_percentage)/100 > Portfolio['Shares']['Buy_Value'][company] or self.allow_loss:
-                        Portfolio['Money']['Spending Money'] += sell_value * ( 100 - self.transaction_fees_percentage) / 100 - profit * self.ratio_of_gain_to_save
-                        Portfolio['Money']['Savings'] += profit * self.ratio_of_gain_to_save
+                        # If wanted, negatif profit will be charged on spending money
+                        if profit > 0 or self.allow_loss_imputation_on_savings:
+                            Portfolio['Money']['Spending Money'] += sell_value * ( 100 - self.transaction_fees_percentage) / 100 - profit * self.ratio_of_gain_to_save
+                            Portfolio['Money']['Savings'] += profit * self.ratio_of_gain_to_save
+
+                        else:
+                            Portfolio['Money']['Spending Money'] += sell_value * ( 100 - self.transaction_fees_percentage) / 100
+
+                        # Simulate the rest of the portfolio
                         Portfolio['Shares']['Count'][company] -= nb_symbols_to_sell
                         Portfolio['Shares']['Buy_Value'][company] -= sell_value
                         Portfolio['Money']['Transaction_fees_paid'] += sell_value * self.transaction_fees_percentage / 100
@@ -231,7 +239,7 @@ class Portfolio_class():
             
             # Portfolio audit trail creation
             Savings = self.value(Portfolio, small_dataset)
-            Portfolio_history.append({**Portfolio, **Savings})
+            Portfolio_history.append({**Portfolio, **Savings}) # python 3.8 solution
             #Portfolio_history.append(Portfolio | Savings) # ALERT only in python 3.9
 
             self.portfolio = Portfolio
