@@ -10,7 +10,7 @@
     "ratio_max_investment_per_value": 0.25,
     "BS_deals_print": false,
     "Optimization_run": false,
-    "Performance_analysis_run": true,
+    "Performance_analysis_run": false,
     "Companies_list_path": "\\resources\\NASDAQ_Companies_List.csv",
     "hist_path":"\\resources\\full_NASDAQ_history.csv",
     "ML_dataset_path": "\\resources\\ML_Dataset.csv",
