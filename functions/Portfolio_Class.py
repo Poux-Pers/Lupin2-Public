@@ -14,6 +14,7 @@ from tqdm.auto import tqdm
 
 # ---- FUNCTIONS -----
 from functions.BuySell_Models import BuySell
+from functions.ML_Models import ML_Models
 
 
 # -------------------- 
@@ -33,6 +34,7 @@ class Portfolio_class():
     def __init__(self, Parameters):
         self.path = os.getcwd() + '\\resources\\Portfolio.json'
         self.portfolio = {}
+        self.parameters = Parameters
         self.mesh = Parameters['Mesh']
         self.trend_length = Parameters['trend_length']
         self.initial_investment = Parameters['initial_investment']
@@ -115,6 +117,12 @@ class Portfolio_class():
         else:
             dataset = dataset[dataset.index.isin(self.companies_list)]
         
+        # Train the models if needed
+        if self.models_to_use['NN']:
+            ML_Models(self.parameters).verify_train_NN()
+        elif self.models_to_use['TCN']:
+            ML_Models(self.parameters).verify_train_TCN()
+
         # Visual feedback
         print('Portfolio simulation in progress')
 
@@ -125,27 +133,22 @@ class Portfolio_class():
             deals_history_dict[day] = []
 
             # Reducing the dataset to the trend period studied and the companies in the companies list
-            small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
-            medium_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
+            if self.models_to_use['NN'] or self.models_to_use['TCN']:
+                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
+            else:
+                small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
 
             # Accuracy measurment (R²)
             if day != self.ML_trend_length:
                 for company in self.companies_list:
-                    #print('Company: ', company)
-                    #print('Prediction: ', prediction_dict[company])
-                    #print('Actual: ', small_dataset.loc[company,:].to_list()[-1])
-                    #print('mean: ', np.mean(small_dataset.loc[company,:].to_list()))
-
-                    sum_prediction_deviation[company] += (prediction_dict[company] - small_dataset.loc[company,:].to_list()[-1])**2
-                    sum_mean_deviation[company] += (np.mean(small_dataset.loc[company,:].to_list()) - small_dataset.loc[company,:].to_list()[-1])**2
+                    values_list = small_dataset.loc[company,:].to_list()
+                    sum_prediction_deviation[company] += (prediction_dict[company] - values_list[-1])**2
+                    sum_mean_deviation[company] += (np.mean(values_list) - values_list[-1])**2
 
             # Getting the list of the values to buy and their prediction
             for model in self.models_to_use:
                 if self.models_to_use[model]:
-                    if model not in ['NN', 'TCN']:
-                        BS_dict, prediction_dict, next_variation_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
-                    else:
-                        BS_dict, prediction_dict, next_variation_dict = eval('BuySell(medium_dataset, Parameters).'+model+'()')
+                    BS_dict, prediction_dict, next_variation_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
 
                     # Add the results to the lists if we want to combine some models
                     BS_dict_list.append(BS_dict)

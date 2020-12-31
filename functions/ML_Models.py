@@ -16,6 +16,8 @@ from tqdm.auto import tqdm
 from keras.models import Model, Sequential
 from keras.layers import add,Input,Conv1D,Activation,Flatten,Dense
 
+# ---- FUNCTIONS -----
+from functions.Dataset_Class import Dataset
 
 # -------------------- 
 # PARAMETERS
@@ -44,6 +46,7 @@ class ML_Models():
         self.companies_list_path = Parameters['Companies_list_path']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()        
         self.parameters = Parameters
+        self.ML_dataset_parameters_path = Parameters['ML_dataset_parameters_path']
 
     def train_NN(self, dataset):
         # Columns creation
@@ -70,15 +73,39 @@ class ML_Models():
 
         # evaluate the keras model
         _, accuracy = model.evaluate(X, y)
-        print('Accuracy: %.2f' % (accuracy*100))
+        print('Average error: %.2f' % (accuracy*100))
 
-        # Save the model and the parameters used
+        # Save the model
         model.save(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))
-        with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
-            json.dump(self.parameters, json_file)
 
         return()
     
+    def verify_train_NN(self):
+        # Load parameters used during model training and if trend different than current param re-create model and train and save param
+        with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
+            ML_Parameters = json.load(json_file)
+
+        # Verify if the dataset has to be redone
+        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
+            # Hist loading and dataset creation
+            my_hist = Dataset(Parameters)
+            my_hist.load()
+            ML_dataset = my_hist.new_format(len(my_hist.hist))
+
+            # Create the dataset
+            ML_dataset = my_hist.create_ML_dataset(ML_dataset)
+
+            # Save dataset parameters
+            with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+                json.dump(self.parameters, json_file)
+
+        else:
+            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
+
+        if not(os.path.exists(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))):
+            # Train the dataset
+            self.train_NN(ML_dataset)
+
     def ResBlock(self, x, filters, kernel_size, dilation_rate):
         # Residual block
         r=Conv1D(filters,kernel_size,padding='same',dilation_rate=dilation_rate,activation='relu')(x) #first convolution
@@ -101,7 +128,6 @@ class ML_Models():
         X = dataset.loc[:, columns]
         y = dataset['prediction']
         
-
         # Define the nb of layers to adapt to the parameters        
         nb_layers = int(np.log(self.ML_trend_length)/np.log(2))
 
@@ -124,14 +150,38 @@ class ML_Models():
 
         # evaluate the keras model
         _, accuracy = model.evaluate(X, y)
-        print('Accuracy: %.2f' % (accuracy*100))
+        print('Average error: %.2f' % (accuracy*100))
 
-        # Save the model and the parameters used
+        # Save the model 
         model.save(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
-        with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
-            json.dump(self.parameters, json_file)
 
         return()
+
+    def verify_train_TCN(self):
+        # Load parameters used during model training and if trend different than current param re-create model and train and save param
+        with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
+            ML_Parameters = json.load(json_file)
+
+        # Verify if the dataset has to be redone
+        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
+            # Hist loading and dataset creation
+            my_hist = Dataset(Parameters)
+            my_hist.load()
+            ML_dataset = my_hist.new_format(len(my_hist.hist))
+
+            # Create the dataset
+            ML_dataset = my_hist.create_ML_dataset(ML_dataset)
+
+            # Save dataset parameters
+            with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+                json.dump(self.parameters, json_file)
+            
+        else:
+            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
+
+        if not(os.path.exists(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))):
+            # Train the dataset
+            self.train_TCN(ML_dataset)
 
 
 if __name__ == "__main__":
@@ -153,4 +203,4 @@ if __name__ == "__main__":
 
 # ----- COMMENTS -----
 # https://machinelearningmastery.com/tutorial-first-neural-network-python-keras/
-# TCN model is a 
+# TCN model is inspired of https://github.com/philipperemy/keras-tcn and https://www.programmersought.com/article/13674618779/

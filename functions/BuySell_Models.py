@@ -174,26 +174,6 @@ class BuySell():
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
 
-        # Load parameters used during model training and if trend different than current param re-create model and train and save param
-        with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
-            ML_Parameters = json.load(json_file)
-
-        # Verify if the dataset has to be redone
-        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
-            # Hist loading and dataset creation
-            my_hist = Dataset(Parameters)
-            my_hist.load()
-            ML_dataset = my_hist.new_format(len(my_hist.hist))
-
-            # Create the dataset
-            ML_dataset = my_hist.create_ML_dataset(ML_dataset)
-        else:
-            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
-
-        if not(os.path.exists(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))):
-            # Train the dataset
-            ML_Models(Parameters).train_NN(ML_dataset)
-
         # Load model
         model = keras.models.load_model(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))
 
@@ -370,26 +350,6 @@ class BuySell():
 
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
-
-        # Load parameters used during model training and if trend different than current param re-create model and train and save param
-        with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
-            ML_Parameters = json.load(json_file)
-
-        # Verify if the dataset has to be redone
-        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
-            # Hist loading and dataset creation
-            my_hist = Dataset(Parameters)
-            my_hist.load()
-            ML_dataset = my_hist.new_format(len(my_hist.hist))
-
-            # Create the dataset
-            ML_dataset = my_hist.create_ML_dataset(ML_dataset)
-        else:
-            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
-
-        if not(os.path.exists(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))):
-            # Train the dataset
-            ML_Models(Parameters).train_TCN(ML_dataset)
 
         # Load model
         model = keras.models.load_model(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
