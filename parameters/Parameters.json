@@ -20,12 +20,12 @@
     "Send_to_ES": false,
     "Plot_Graph": true,
     "Models_to_use":{
-      "trend": true,
+      "trend": false,
       "graduated_weights": false,
       "random_walks": false,
       "three_in_row": false,
       "NN": false,
-      "TCN": false      
+      "TCN": true      
     },
     "allow_loss": true,
     "allow_loss_imputation_on_savings": true
