@@ -5,6 +5,7 @@
 # ---- LIBRARIES -----
 import os
 import json
+import keras
 import datetime
 import math as ma
 import numpy as np
@@ -45,6 +46,8 @@ class Portfolio_class():
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
         self.models_to_use = Parameters['Models_to_use']
         self.allow_loss = Parameters['allow_loss']
+        self.NN_model_path = Parameters['NN_model_path']
+        self.TCN_model_path = Parameters['TCN_model_path']
         self.ML_trend_length = Parameters['ML_trend_length']
         self.allow_loss_imputation_on_savings = Parameters['allow_loss_imputation_on_savings']
 
@@ -118,11 +121,13 @@ class Portfolio_class():
         else:
             dataset = dataset[dataset.index.isin(self.companies_list)]
         
-        # Train the models if needed
+        # Train the models if needed and load it
         if self.models_to_use['NN']:
             ML_Models(self.parameters).verify_train_NN()
+            pre_loaded_model = keras.models.load_model(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))
         elif self.models_to_use['TCN']:
             ML_Models(self.parameters).verify_train_TCN()
+            pre_loaded_model = keras.models.load_model(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
 
         # Visual feedback
         print('Portfolio simulation in progress')
@@ -136,8 +141,10 @@ class Portfolio_class():
             # Reducing the dataset to the trend period studied and the companies in the companies list
             if self.models_to_use['NN'] or self.models_to_use['TCN']:
                 small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
+                str_model = 'pre_loaded_model'
             else:
                 small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
+                str_model = ''
 
             # Accuracy measurment (R²)
             if day != self.ML_trend_length:
@@ -149,7 +156,7 @@ class Portfolio_class():
             # Getting the list of the values to buy and their prediction
             for model in self.models_to_use:
                 if self.models_to_use[model]:
-                    BS_dict, prediction_dict, next_variation_dict = eval('BuySell(small_dataset, Parameters).'+model+'()')
+                    BS_dict, prediction_dict, next_variation_dict = eval('BuySell(small_dataset, Parameters).'+model+'('+str_model+')')
 
                     # Add the results to the lists if we want to combine some models
                     BS_dict_list.append(BS_dict)

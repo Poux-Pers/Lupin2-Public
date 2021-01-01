@@ -261,6 +261,7 @@ if __name__ == "__main__":
     # Test lines, executed only when the file is executed as main
     full_hist = Dataset(Parameters)
     full_hist.load()
+    
     if full_hist.date_name != '1m':
         full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].astype('datetime64[ns]')
     else:

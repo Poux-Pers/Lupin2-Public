@@ -7,6 +7,7 @@ import os
 import json
 import keras
 import random
+import datetime
 import numpy as np
 import pandas as pd
 
@@ -166,7 +167,7 @@ class BuySell():
         
         return(BS_dict, prediction_dict, next_variation_dict)
 
-    def NN(self):
+    def NN(self, model):
         # Creation of the dictionary to calculate next values
         prediction_dict = {}
         next_variation_dict = {}
@@ -174,23 +175,27 @@ class BuySell():
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
 
-        # Load model
-        model = keras.models.load_model(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))
-
         # Prediction dictionary filling
+        t0 = datetime.datetime.now()
         for company in self.companies_list:
             values_list = self.df.loc[company,:].to_list()
 
             # Normalize
             normalizer = max(values_list) * 2
 
-            # calculate next value for accuracy 
-            prediction_dict[company] = model.predict(np.array([[x/normalizer for x in values_list]], dtype=float)) * normalizer
+            # Next value calculation
+            if normalizer > 0:
+                prediction_dict[company] = model.predict(np.array([[x/normalizer for x in values_list]], dtype=float)) * normalizer
+            else:
+                prediction_dict[company] = 0
+
+            # Variation calculation
             if values_list[-1] > 0:
                 next_variation_dict[company] = prediction_dict[company] / values_list[-1]
             else:
                 next_variation_dict[company] = 1
 
+        print(str(datetime.datetime.now() - t0) + ' sec for companies prediction')
         # Creation of the dictionary to advise Buy or Sell
         if len(self.companies_list) > 1:
             avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
@@ -343,16 +348,13 @@ class BuySell():
         
         return(BS_dict, prediction_dict, next_variation_dict)
 
-    def TCN(self):
+    def TCN(self, model):
         # Creation of the dictionary to calculate next values
         prediction_dict = {}
         next_variation_dict = {}
 
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
-
-        # Load model
-        model = keras.models.load_model(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
 
         # Prediction dictionary filling
         for company in self.companies_list:
@@ -361,9 +363,13 @@ class BuySell():
             # Normalize
             normalizer = max(values_list) * 2
 
-            # calculate next value for accuracy 
-            prediction_dict[company] = model.predict(np.array([[x/normalizer for x in values_list]], dtype=float)) * normalizer
+            # Next value calculation
+            if normalizer > 0:
+                prediction_dict[company] = model.predict(np.array([[x/normalizer for x in values_list]], dtype=float)) * normalizer
+            else:
+                prediction_dict[company] = 0
 
+            # Variation calculation
             if values_list[-1] > 0:
                 next_variation_dict[company] = prediction_dict[company] / values_list[-1]
             else:
