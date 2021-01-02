@@ -187,12 +187,15 @@ if __name__ == "__main__":
 
         # Sending Portfolio to ES
         i = 0
-        if Parameters['Send_to_ES']:
+        if Parameters['ES']['Send_to_ES']:
             Elasticsearch_class(Parameters).upload_hist()
             Elasticsearch_class(Parameters).reset_portfolio_index()
             for portfolio in tqdm(Portfolio_history_list):
                 i += 1
                 Elasticsearch_class(Parameters).upload_dict(portfolio, i)
+
+                if Parameters['ES']['Delay?']:
+                    time.sleep(Parameters['ES']['Delay (in seconds)'])
         
         # ------- KPI --------
         # Print last Savings
