@@ -3,7 +3,7 @@
     "Mesh": "1d",
     "trend_length": 5,
     "ML_trend_length": 32,
-    "study_length":532,
+    "study_length": 2032,
     "initial_investment": 5000,
     "transaction_fees_percentage": 0.5,
     "ratio_of_gain_to_save": 0,
@@ -24,10 +24,10 @@
       "graduated_weights": false,
       "random_walks": false,
       "three_in_row": false,
-      "NN": false,
-      "TCN": true      
+      "NN": true,
+      "TCN": false      
     },
     "allow_loss": true,
-    "allow_loss_imputation_on_savings": true
+    "allow_loss_imputation_on_savings": false
   }
   

@@ -69,6 +69,9 @@ companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Co
 # Using only the symbols of the company list
 full_hist.hist = full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
 
+# Erase the current hist to keep only symbols in the list - Counterproductive but can be used as a feature
+#full_hist.save()
+
 # ----- DATASET ------
 # Reduce the dataset size to the period studied
 dataset = full_hist.new_format(Parameters['study_length']).fillna(0)
