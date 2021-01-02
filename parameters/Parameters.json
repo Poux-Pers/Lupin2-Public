@@ -17,7 +17,7 @@
     "ML_dataset_parameters_path": "\\parameters\\ML_Dataset_Parameters.json",
     "NN_model_path" : "\\models\\NN",
     "TCN_model_path" : "\\models\\TCN",
-    "Send_to_ES": true,
+    "Send_to_ES": false,
     "Plot_Graph": true,
     "Models_to_use":{
       "trend": false,

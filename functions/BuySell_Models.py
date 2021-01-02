@@ -30,9 +30,9 @@ with open(os.getcwd()+'\\parameters\\Parameters.json', 'r') as json_file:
 # LOCAL PARAMETERS
 # -------------------- 
 add_specific_rules = True
-#sell_after_stagnation = {'y/n': True, 'nb_days': 4}
+sell_after_stagnation = {'y/n': True, 'nb_days': 4}
 sell_after_high_rise_ratio = 2
-sell_after_high_loss_ratio = 1.2
+sell_after_high_loss_ratio = 1.5
 
 
 # -------------------- 
@@ -42,7 +42,7 @@ sell_after_high_loss_ratio = 1.2
 class BuySell():
     
     def __init__(self, short_hist_dataframe, Parameters):
-        self.df = short_hist_dataframe
+        self.df = short_hist_dataframe.fillna(0)
         self.mesh = Parameters['Mesh']
         self.trend_length = Parameters['trend_length']
         self.ML_trend_length = Parameters['ML_trend_length']
@@ -137,7 +137,7 @@ class BuySell():
         if len(self.companies_list) > 1:
             avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
         else:
-            avg_next_variation = 1        
+            avg_next_variation = 1   
         
         # Buy or Sell dictionary filling
         for company in self.companies_list:
@@ -198,7 +198,7 @@ class BuySell():
             avg_next_variation = np.mean(next_variation_df)
         else:
             avg_next_variation = 1
-
+        
         # Transform df in dict
         next_variation_dict = next_variation_df.to_dict()
 
@@ -217,13 +217,13 @@ class BuySell():
             # Specific rules
             if add_specific_rules:
                 # Sell after a high rise
-                if next_variation_dict[company] > sell_after_high_rise_ratio * last_values.loc[company]:
+                if prediction_dict[company] > sell_after_high_rise_ratio * last_values.loc[company]:
                     BS_dict[company] = "Sell"
 
                 # Sell after a high loss
-                if next_variation_dict[company] < last_values.loc[company]/sell_after_high_loss_ratio:
+                if prediction_dict[company] < last_values.loc[company] / sell_after_high_loss_ratio:
                     BS_dict[company] = "Sell"
-        
+
         return(BS_dict, prediction_dict, next_variation_dict)
 
     def random_walks(self):
@@ -376,7 +376,7 @@ class BuySell():
             avg_next_variation = np.mean(next_variation_df)
         else:
             avg_next_variation = 1
-
+        
         # Transform df in dict
         next_variation_dict = next_variation_df.to_dict()
 
@@ -395,11 +395,11 @@ class BuySell():
             # Specific rules
             if add_specific_rules:
                 # Sell after a high rise
-                if next_variation_dict[company] > sell_after_high_rise_ratio * last_values.loc[company]:
+                if prediction_dict[company] > sell_after_high_rise_ratio * last_values.loc[company]:
                     BS_dict[company] = "Sell"
 
                 # Sell after a high loss
-                if next_variation_dict[company] < last_values.loc[company]/sell_after_high_loss_ratio:
+                if prediction_dict[company] < last_values.loc[company] / sell_after_high_loss_ratio:
                     BS_dict[company] = "Sell"
         
         return(BS_dict, prediction_dict, next_variation_dict)
