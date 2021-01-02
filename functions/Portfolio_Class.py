@@ -250,7 +250,14 @@ class Portfolio_class():
             #Portfolio_history.append(Portfolio | Savings) # ALERT only in python 3.9
 
             self.portfolio = Portfolio
-        
+    
+        # NaN handling
+        for x in sum_prediction_deviation:
+            if ma.isnan(sum_prediction_deviation[x]):
+                sum_prediction_deviation[x] = 0
+            if ma.isnan(sum_mean_deviation[x]):
+                sum_mean_deviation[x] = 0.00000000000000001
+
         R2 = int(np.mean([1 - sum_prediction_deviation[x]/(sum_mean_deviation[x]+0.00000000000000001) for x in sum_prediction_deviation])*1000)/1000 # temp fix to avoid /O
         
         return(Portfolio, Portfolio_history, R2, deals_history_dict)
