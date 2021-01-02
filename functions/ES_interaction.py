@@ -99,7 +99,7 @@ class Elasticsearch_class():
 
         self.es.indices.refresh(index='hist_'+self.mesh)
 
-    def upload_dict(self, my_dict, es_id):        
+    def upload_dict(self, my_dict, es_id):
         # Portfolio enrichment
         my_dict['id'] = es_id
 
@@ -108,12 +108,29 @@ class Elasticsearch_class():
 
         self.es.indices.refresh(index='portfolio')
 
+        # Loading in bulk companies information
+        df = pd.DataFrame(my_dict['Shares'])
+        df['id'] = [es_id] * len(df)
+        df.dropna(inplace = True)
+        df = df.reset_index()
+        documents = df.to_dict(orient='records')
+        bulk(self.es, documents, index='my_portfolio', raise_on_error=True)
+
     def reset_portfolio_index(self):        
         # Clean index
         self.es.indices.delete(index='portfolio', ignore=[400, 404])
+        self.es.indices.delete(index='my_portfolio', ignore=[400, 404])
 
         # Create index
         self.es.indices.create(index='portfolio',body={})
+        self.es.indices.create(index='my_portfolio',body={})
+
+def rec_to_actions(df, es_id):
+    import json
+    INDEX="my_portfolio"
+    for record in df.to_dict(orient="records"):
+        yield ('{ "index" : { "_index" : "%s", "_id": "%s" }}'% (INDEX, es_id))
+        yield (json.dumps(record, default=int))
         
     
 if __name__ == "__main__":

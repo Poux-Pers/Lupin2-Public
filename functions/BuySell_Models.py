@@ -201,10 +201,7 @@ class BuySell():
         
         # Transform df in dict
         next_variation_dict = next_variation_df.to_dict()
-
-        print(avg_next_variation)
-        print(next_variation_dict)
-
+        
         # Buy or Sell dictionary filling
         for company in self.companies_list:
             # Condition to buy or Sell
