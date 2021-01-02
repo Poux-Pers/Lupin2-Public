@@ -221,7 +221,7 @@ class Portfolio_class():
                     # Sell all
                     
                     sell_value = int(nb_symbols_to_sell*symbol_current_value * 1000) / 1000
-                    profit = sell_value - Portfolio['Shares']['Buy_Value'][company]
+                    profit = sell_value - Portfolio['Shares']['Buy_Value'][company] * nb_symbols_to_sell / Portfolio['Shares']['Count'][company]
                     
                     # Portfolio update
                     if sell_value*(100-self.transaction_fees_percentage)/100 > Portfolio['Shares']['Buy_Value'][company] or self.allow_loss:
@@ -234,8 +234,8 @@ class Portfolio_class():
                             Portfolio['Money']['Spending Money'] += sell_value * ( 100 - self.transaction_fees_percentage) / 100
 
                         # Simulate the rest of the portfolio
+                        Portfolio['Shares']['Buy_Value'][company] -= Portfolio['Shares']['Buy_Value'][company] * (nb_symbols_to_sell / Portfolio['Shares']['Count'][company])
                         Portfolio['Shares']['Count'][company] -= nb_symbols_to_sell
-                        Portfolio['Shares']['Buy_Value'][company] -= sell_value
                         Portfolio['Money']['Transaction_fees_paid'] += sell_value * self.transaction_fees_percentage / 100
 
                         # Print deal details
@@ -244,13 +244,23 @@ class Portfolio_class():
                         if self.BS_deals_print:
                             print(deal_str)
             
-            # Portfolio audit trail creation
+            # Portfolio audit trail creation plus enrichment
+            Portfolio['Shares']['B/S_advice'] = BS_dict
+            Portfolio['Shares']['Predicted_Variation'] = next_variation_dict
+
             Savings = self.value(Portfolio, small_dataset)
             Portfolio_history.append({**Portfolio, **Savings}) # python 3.8 solution
             #Portfolio_history.append(Portfolio | Savings) # ALERT only in python 3.9
 
             self.portfolio = Portfolio
-        
+    
+        # NaN handling
+        for x in sum_prediction_deviation:
+            if ma.isnan(sum_prediction_deviation[x]):
+                sum_prediction_deviation[x] = 0
+            if ma.isnan(sum_mean_deviation[x]):
+                sum_mean_deviation[x] = 0.00000000000000001
+
         R2 = int(np.mean([1 - sum_prediction_deviation[x]/(sum_mean_deviation[x]+0.00000000000000001) for x in sum_prediction_deviation])*1000)/1000 # temp fix to avoid /O
         
         return(Portfolio, Portfolio_history, R2, deals_history_dict)

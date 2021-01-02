@@ -191,7 +191,7 @@ class BuySell():
         last_values = self.df.loc[:,self.df.columns.to_list()[-1]]
 
         # Calculate the predicted variation 
-        next_variation_df = prediction_dict.div(last_values.to_list(), axis=0).fillna(0)
+        next_variation_df = prediction_dict.div(last_values.to_list(), axis=0).fillna(1)
 
         # Creation of the dictionary to advise Buy or Sell
         if len(self.companies_list) > 1:
@@ -201,6 +201,9 @@ class BuySell():
         
         # Transform df in dict
         next_variation_dict = next_variation_df.to_dict()
+
+        print(avg_next_variation)
+        print(next_variation_dict)
 
         # Buy or Sell dictionary filling
         for company in self.companies_list:

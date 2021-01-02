@@ -9,3 +9,4 @@ resources/full_NASDAQ_history_Full.csv
 Pipfile
 Pipfile.lock
 pycallgraph.png
+debug.log
