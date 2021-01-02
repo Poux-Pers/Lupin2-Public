@@ -30,7 +30,7 @@ with open(os.getcwd()+'\\parameters\\Parameters.json', 'r') as json_file:
 # LOCAL PARAMETERS
 # -------------------- 
 add_specific_rules = True
-sell_after_stagnation = {'y/n': True, 'nb_days': 4}
+#sell_after_stagnation = {'y/n': True, 'nb_days': 4}
 sell_after_high_rise_ratio = 2
 sell_after_high_loss_ratio = 1.2
 
@@ -174,33 +174,33 @@ class BuySell():
 
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
+        
+        # Get max value by list
+        maxes_list = self.df.max(axis=1).multiply(2)
 
-        # Prediction dictionary filling
-        t0 = datetime.datetime.now()
-        for company in self.companies_list:
-            values_list = self.df.loc[company,:].to_list()
+        # Batch prediction
+        predict_list = model.predict(self.df.div(maxes_list.to_list(), axis=0))
 
-            # Normalize
-            normalizer = max(values_list) * 2
+        # Flatten the prediction
+        flat_predict_list = [x[0] for x in predict_list]
 
-            # Next value calculation
-            if normalizer > 0:
-                prediction_dict[company] = model.predict(np.array([[x/normalizer for x in values_list]], dtype=float)) * normalizer
-            else:
-                prediction_dict[company] = 0
+        # Multiply the prediction result
+        prediction_dict = maxes_list.multiply(flat_predict_list, axis=0)
 
-            # Variation calculation
-            if values_list[-1] > 0:
-                next_variation_dict[company] = prediction_dict[company] / values_list[-1]
-            else:
-                next_variation_dict[company] = 1
+        # Last values
+        last_values = self.df.loc[:,self.df.columns.to_list()[-1]]
 
-        print(str(datetime.datetime.now() - t0) + ' sec for companies prediction')
+        # Calculate the predicted variation 
+        next_variation_df = prediction_dict.div(last_values.to_list(), axis=0).fillna(0)
+
         # Creation of the dictionary to advise Buy or Sell
         if len(self.companies_list) > 1:
-            avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+            avg_next_variation = np.mean(next_variation_df)
         else:
             avg_next_variation = 1
+
+        # Transform df in dict
+        next_variation_dict = next_variation_df.to_dict()
 
         # Buy or Sell dictionary filling
         for company in self.companies_list:
@@ -217,15 +217,11 @@ class BuySell():
             # Specific rules
             if add_specific_rules:
                 # Sell after a high rise
-                if values_list[-1] > sell_after_high_rise_ratio * values_list[-2]:
+                if next_variation_dict[company] > sell_after_high_rise_ratio * last_values.loc[company]:
                     BS_dict[company] = "Sell"
 
                 # Sell after a high loss
-                if values_list[-1] < values_list[-2]/sell_after_high_loss_ratio:
-                    BS_dict[company] = "Sell"
-
-                # Stagnation
-                if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
+                if next_variation_dict[company] < last_values.loc[company]/sell_after_high_loss_ratio:
                     BS_dict[company] = "Sell"
         
         return(BS_dict, prediction_dict, next_variation_dict)
@@ -349,6 +345,7 @@ class BuySell():
         return(BS_dict, prediction_dict, next_variation_dict)
 
     def TCN(self, model):
+        # Same as NN
         # Creation of the dictionary to calculate next values
         prediction_dict = {}
         next_variation_dict = {}
@@ -356,30 +353,32 @@ class BuySell():
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
 
-        # Prediction dictionary filling
-        for company in self.companies_list:
-            values_list = self.df.loc[company,:].to_list()
+        # Get max value by list
+        maxes_list = self.df.max(axis=1).multiply(2)
 
-            # Normalize
-            normalizer = max(values_list) * 2
+        # Batch prediction
+        predict_list = model.predict(self.df.div(maxes_list.to_list(), axis=0))
 
-            # Next value calculation
-            if normalizer > 0:
-                prediction_dict[company] = model.predict(np.array([[x/normalizer for x in values_list]], dtype=float)) * normalizer
-            else:
-                prediction_dict[company] = 0
+        # Flatten the prediction
+        flat_predict_list = [x[0] for x in predict_list]
 
-            # Variation calculation
-            if values_list[-1] > 0:
-                next_variation_dict[company] = prediction_dict[company] / values_list[-1]
-            else:
-                next_variation_dict[company] = 1
+        # Multiply the prediction result
+        prediction_dict = maxes_list.multiply(flat_predict_list, axis=0)
+
+        # Last values
+        last_values = self.df.loc[:,self.df.columns.to_list()[-1]]
+
+        # Calculate the predicted variation 
+        next_variation_df = prediction_dict.div(last_values.to_list(), axis=0).fillna(0)
 
         # Creation of the dictionary to advise Buy or Sell
         if len(self.companies_list) > 1:
-            avg_next_variation = np.mean([next_variation_dict[x] for x in next_variation_dict])
+            avg_next_variation = np.mean(next_variation_df)
         else:
             avg_next_variation = 1
+
+        # Transform df in dict
+        next_variation_dict = next_variation_df.to_dict()
 
         # Buy or Sell dictionary filling
         for company in self.companies_list:
@@ -396,15 +395,11 @@ class BuySell():
             # Specific rules
             if add_specific_rules:
                 # Sell after a high rise
-                if values_list[-1] > sell_after_high_rise_ratio * values_list[-2]:
+                if next_variation_dict[company] > sell_after_high_rise_ratio * last_values.loc[company]:
                     BS_dict[company] = "Sell"
 
                 # Sell after a high loss
-                if values_list[-1] < values_list[-2]/sell_after_high_loss_ratio:
-                    BS_dict[company] = "Sell"
-
-                # Stagnation
-                if sell_after_stagnation['y/n'] and sum(values_list[-sell_after_stagnation['nb_days']-1:-1])/sell_after_stagnation['nb_days']+1 == values_list[-1]:
+                if next_variation_dict[company] < last_values.loc[company]/sell_after_high_loss_ratio:
                     BS_dict[company] = "Sell"
         
         return(BS_dict, prediction_dict, next_variation_dict)
