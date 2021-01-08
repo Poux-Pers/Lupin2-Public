@@ -2,11 +2,11 @@
     "Update_Values": false,
     "Mesh": "1d",
     "trend_length": 5,
-    "ML_trend_length": 32,
-    "study_length": 232,
+    "ML_trend_length": 64,
+    "study_length": 564,
     "initial_investment": 5000,
     "transaction_fees_percentage": 0.5,
-    "ratio_of_gain_to_save": 0,
+    "ratio_of_gain_to_save": 0.01,
     "ratio_max_investment_per_value": 0.25,
     "BS_deals_print": false,
     "Optimization_run": false,
@@ -18,7 +18,7 @@
     "NN_model_path" : "\\models\\NN",
     "TCN_model_path" : "\\models\\TCN",
     "ES": {
-      "Send_to_ES": true,
+      "Send_to_ES": false,
       "Delay?": false,
       "Delay (in seconds)": 10
     },
@@ -31,7 +31,7 @@
       "NN": true,
       "TCN": false      
     },
-    "allow_loss": false,
+    "allow_loss": true,
     "allow_loss_imputation_on_savings": false
   }
   

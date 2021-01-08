@@ -62,7 +62,7 @@ class Dataset():
         self.date_name = ''
         self.companies_list_path = Parameters['Companies_list_path']
         self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
-        
+        self.study_length = Parameters['study_length']
 
     def load(self):
         
@@ -208,7 +208,8 @@ class Dataset():
             columns.append('Day_'+str(i+1))
         columns.append('prediction')
 
-        for day in tqdm(range(self.ML_trend_length+1, len(dataset.columns.to_list())-1)):
+        # Let's not take the period we study for training :)
+        for day in tqdm(range(self.ML_trend_length+1, len(dataset.columns.to_list())-self.study_length)):
             # Reinitialization
             BS_dict_list = []
             prediction_dict_list = []
