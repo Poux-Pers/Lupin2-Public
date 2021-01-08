@@ -128,6 +128,9 @@ class Portfolio_class():
         elif self.models_to_use['TCN']:
             ML_Models(self.parameters).verify_train_TCN()
             pre_loaded_model = keras.models.load_model(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
+        elif self.models_to_use['LSTM']:
+            ML_Models(self.parameters).verify_train_LSTM()
+            pre_loaded_model = keras.models.load_model(os.getcwd()+self.LSTM_model_path+str(self.ML_trend_length))
 
         # Visual feedback
         print('Portfolio simulation in progress')
@@ -139,7 +142,7 @@ class Portfolio_class():
             deals_history_dict[day] = []
 
             # Reducing the dataset to the trend period studied and the companies in the companies list
-            if self.models_to_use['NN'] or self.models_to_use['TCN']:
+            if self.models_to_use['NN'] or self.models_to_use['TCN'] or self.models_to_use['LSTM']:
                 small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
                 str_model = 'pre_loaded_model'
             else:

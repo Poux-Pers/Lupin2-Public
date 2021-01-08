@@ -12,6 +12,8 @@ import pandas as pd
 import yfinance as yf
 
 from tqdm.auto import tqdm
+#from sklearn.preprocessing import MinMaxScaler
+#from sklearn.metrics import mean_squared_error
 
 
 # -------------------- 
@@ -235,6 +237,10 @@ class Dataset():
 
         # Normalize lines
         ML_dataset = ML_dataset.div(ML_dataset.max(axis=1)*2, axis=0)
+        
+        # normalize the dataset
+        #scaler = MinMaxScaler(feature_range=(0, 1))
+        #dataset = scaler.fit_transform(dataset)
         
         # Save dataframe and the parameters used
         ML_dataset.to_csv(os.getcwd() + self.ML_dataset_path)

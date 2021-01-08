@@ -181,3 +181,20 @@ print('----- Average R2: '+str(R2)+' -----')
 
 # Close the log file
 sys.stdout.close()
+
+# LSTM
+# Reset other models
+for model in Parameters['Models_to_use']:
+    Parameters['Models_to_use'][model] = False
+
+Parameters['Models_to_use']['LSTM'] = True
+Portfolio = Portfolio_class(Parameters)
+Portfolio.reset()
+last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+print('----- LSTM -----')
+print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
+
+# Close the log file
+sys.stdout.close()

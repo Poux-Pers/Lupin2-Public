@@ -14,7 +14,7 @@ import tensorflow as tf
 
 from tqdm.auto import tqdm
 from keras.models import Model, Sequential
-from keras.layers import add,Input,Conv1D,Activation,Flatten,Dense
+from keras.layers import add,Input,Conv1D,Activation,Flatten,Dense, LSTM
 
 # ---- FUNCTIONS -----
 from functions.Dataset_Class import Dataset
@@ -39,7 +39,8 @@ class ML_Models():
         self.hist_path = Parameters['hist_path']
         self.ML_dataset_path = Parameters['ML_dataset_path']   
         self.NN_model_path = Parameters['NN_model_path']
-        self.TCN_model_path = Parameters['TCN_model_path']
+        self.TCN_model_path = Parameters['TCN_model_path']        
+        self.LSTM_model_path = Parameters['LSTM_model_path']
         self.trend_length = Parameters['trend_length']
         self.ML_trend_length = Parameters['ML_trend_length']
         self.date_name = ''
@@ -183,6 +184,70 @@ class ML_Models():
             # Train the dataset
             self.train_TCN(ML_dataset)
 
+    def create_dataset(self, dataset, look_back=1):
+        dataX, dataY = [], []
+        for i in range(len(dataset)-look_back-1):
+            a = dataset[i:(i+look_back), 0]
+            dataX.append(a)
+            dataY.append(dataset[i + look_back, 0])
+        return(np.array(dataX), np.array(dataY))
+
+    def train_LSTM(self, dataset):
+        # Columns creation
+        columns = []
+        for i in range(self.ML_trend_length):
+            columns.append('Day_'+str(i+1))
+
+        # Define input, output and memory
+        X = dataset.loc[:, columns]
+        y = dataset['prediction']
+        look_back = 1
+                
+        # create and fit the LSTM network
+        model = Sequential()
+        model.add(LSTM(4, input_shape=(1, look_back)))
+        model.add(Dense(1))
+
+        # Compile the keras model
+        model.compile(loss=tf.losses.MeanSquaredError(), optimizer='adam', metrics=[tf.metrics.MeanAbsoluteError()])
+
+        # Fit the keras model on the dataset        
+        model.fit(X, y, epochs=100, batch_size=1, verbose=2)
+
+        # evaluate the keras model
+        _, accuracy = model.evaluate(X, y)
+        print('Average error: %.2f' % (accuracy*100))
+
+        # Save the model
+        model.save(os.getcwd()+self.LSTM_model_path+str(self.ML_trend_length))
+
+        return()
+
+    def verify_train_LSTM(self):
+        # Load parameters used during model training and if trend different than current param re-create model and train and save param
+        with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
+            ML_Parameters = json.load(json_file)
+
+        # Verify if the dataset has to be redone
+        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
+            # Hist loading and dataset creation
+            my_hist = Dataset(Parameters)
+            my_hist.load()
+            ML_dataset = my_hist.new_format(len(my_hist.hist))
+
+            # Create the dataset
+            ML_dataset = my_hist.create_ML_dataset(ML_dataset)
+
+            # Save dataset parameters
+            with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+                json.dump(self.parameters, json_file)
+
+        else:
+            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
+
+        if not(os.path.exists(os.getcwd()+self.LSTM_model_path+str(self.ML_trend_length))):
+            # Train the dataset
+            self.train_LSTM(ML_dataset)
 
 if __name__ == "__main__":
     # Columns creation

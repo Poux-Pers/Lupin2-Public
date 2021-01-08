@@ -2,8 +2,8 @@
     "Update_Values": false,
     "Mesh": "1d",
     "trend_length": 5,
-    "ML_trend_length": 64,
-    "study_length": 564,
+    "ML_trend_length": 32,
+    "study_length": 532,
     "initial_investment": 5000,
     "transaction_fees_percentage": 0.5,
     "ratio_of_gain_to_save": 0.01,
@@ -17,6 +17,7 @@
     "ML_dataset_parameters_path": "\\parameters\\ML_Dataset_Parameters.json",
     "NN_model_path" : "\\models\\NN",
     "TCN_model_path" : "\\models\\TCN",
+    "LSTM_model_path" : "\\models\\LSTM",
     "ES": {
       "Send_to_ES": false,
       "Delay?": false,
@@ -28,8 +29,9 @@
       "graduated_weights": false,
       "random_walks": false,
       "three_in_row": false,
-      "NN": true,
-      "TCN": false      
+      "NN": false,
+      "TCN": false,
+      "LSTM": true
     },
     "allow_loss": true,
     "allow_loss_imputation_on_savings": false

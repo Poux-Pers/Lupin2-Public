@@ -404,6 +404,66 @@ class BuySell():
         
         return(BS_dict, prediction_dict, next_variation_dict)
 
+    def LSTM(self, model):
+        # Same as NN
+        # Creation of the dictionary to calculate next values
+        prediction_dict = {}
+        next_variation_dict = {}
+
+        # Creation of the dictionary to advise Buy or Sell
+        BS_dict = {}
+
+        # Get max value by list
+        maxes_list = self.df.max(axis=1).multiply(2)
+
+        # Batch prediction
+        predict_list = model.predict(self.df.div(maxes_list.to_list(), axis=0))
+
+        # Flatten the prediction
+        flat_predict_list = [x[0] for x in predict_list]
+
+        # Multiply the prediction result
+        prediction_dict = maxes_list.multiply(flat_predict_list, axis=0)
+
+        # Last values
+        last_values = self.df.loc[:,self.df.columns.to_list()[-1]]
+
+        # Calculate the predicted variation 
+        next_variation_df = prediction_dict.div(last_values.to_list(), axis=0).fillna(0)
+
+        # Creation of the dictionary to advise Buy or Sell
+        if len(self.companies_list) > 1:
+            avg_next_variation = np.mean(next_variation_df)
+        else:
+            avg_next_variation = 1
+        
+        # Transform df in dict
+        next_variation_dict = next_variation_df.to_dict()
+
+        # Buy or Sell dictionary filling
+        for company in self.companies_list:
+            # Condition to buy or Sell
+            if next_variation_dict[company] > avg_next_variation:
+                BS_dict[company] = "Buy"
+
+            elif next_variation_dict[company] < avg_next_variation:
+                BS_dict[company] = "Sell"
+
+            else:
+                BS_dict[company] = "Hold"
+                
+            # Specific rules
+            if add_specific_rules:
+                # Sell after a high rise
+                if prediction_dict[company] > sell_after_high_rise_ratio * last_values.loc[company]:
+                    BS_dict[company] = "Sell"
+
+                # Sell after a high loss
+                if prediction_dict[company] < last_values.loc[company] / sell_after_high_loss_ratio:
+                    BS_dict[company] = "Sell"
+        
+        return(BS_dict, prediction_dict, next_variation_dict)
+
 
 if __name__ == "__main__":
     study_length = 10
