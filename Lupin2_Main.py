@@ -232,6 +232,7 @@ if __name__ == "__main__":
 # Tidy the parameters file
 # Simplify source selction
 # Do a proper scaling(scikit learn)
+# Finish LSTM - https://machinelearningmastery.com/time-series-prediction-lstm-recurrent-neural-networks-python-keras/
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies

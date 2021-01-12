@@ -115,6 +115,9 @@ class Portfolio_class():
             sum_prediction_deviation[company] = 0
             sum_mean_deviation[company] = 0
 
+        print(len(dataset.columns.to_list()))
+        print(len(self.companies_list))
+
         # Reduce the dataset only to the companies in the list
         if len(self.companies_list) > 1:
             dataset = dataset[dataset.index.isin(self.companies_list+['NASDAQ'])]
@@ -141,10 +144,30 @@ class Portfolio_class():
             prediction_dict_list = []
             deals_history_dict[day] = []
 
+            # Get Company_features for ML
+            Company_features = pd.get_dummies(dataset.index, prefix='Company')
+
             # Reducing the dataset to the trend period studied and the companies in the companies list
-            if self.models_to_use['NN'] or self.models_to_use['TCN'] or self.models_to_use['LSTM']:
-                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
+            if self.models_to_use['NN']:
+                small_dataset = dataset[dataset.columns[day-self.ML_trend_length+1:day]]
+
+                # Need to remove index to concat
+                small_dataset = small_dataset.reset_index()
+                small_dataset.pop('Company')
+
+                # Add company features
+                small_dataset = pd.concat([Company_features, small_dataset], axis=1)  
+
+                # Put back the index for what's coming next
+                small_dataset.index = self.companies_list + ['NASDAQ']
+
                 str_model = 'pre_loaded_model'
+            
+            elif self.models_to_use['TCN'] or self.models_to_use['LSTM']:
+                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]]
+
+                str_model = 'pre_loaded_model'
+
             else:
                 small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
                 str_model = ''
@@ -152,7 +175,7 @@ class Portfolio_class():
             # Accuracy measurment (R²)
             if day != self.ML_trend_length:
                 for company in self.companies_list:
-                    values_list = small_dataset.loc[company,:].to_list()
+                    values_list = small_dataset.loc[company,:].to_list()[-self.ML_trend_length:]
                     sum_prediction_deviation[company] += (prediction_dict[company] - values_list[-1])**2
                     sum_mean_deviation[company] += (np.mean(values_list) - values_list[-1])**2
 

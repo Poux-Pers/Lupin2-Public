@@ -51,7 +51,7 @@ class ML_Models():
 
     def train_NN(self, dataset):
         # Columns creation
-        columns = []
+        columns = ['Company_' + company for company in self.companies_list]
         for i in range(self.ML_trend_length):
             columns.append('Day_'+str(i+1))
 
@@ -61,7 +61,7 @@ class ML_Models():
         
         # Define the keras model
         model = Sequential()
-        model.add(Dense(12, input_dim=self.ML_trend_length, activation='relu'))
+        model.add(Dense(12, input_dim=len(columns), activation='relu'))
         model.add(Dense(8, activation='relu'))
         model.add(Dense(8, activation='relu'))
         model.add(Dense(1, activation='sigmoid'))
@@ -202,6 +202,7 @@ class ML_Models():
         X = dataset.loc[:, columns]
         y = dataset['prediction']
         look_back = 1
+        
                 
         # create and fit the LSTM network
         model = Sequential()

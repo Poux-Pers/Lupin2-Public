@@ -192,7 +192,7 @@ class Dataset():
         return(dataset)
 
     def create_ML_dataset(self, dataset):
-        datasets_lists = []
+        datasets_list = []
         # Reducin the dataset only to the companies in the list
         dataset = dataset[dataset.index.isin(self.companies_list)]
         dataset = dataset.reset_index()
@@ -200,12 +200,9 @@ class Dataset():
         # Dataset enrichment
         #supplement_df = self.enrich_symbol(['sector', 'country', 'shortName'])
         #supplement_df = supplement_df.reset_index()
-        
-        # Visual feedback
-        print('Portfolio simulation in progress')
 
         # Columns creation
-        columns = []
+        columns = ['Company']
         for i in range(self.ML_trend_length):
             columns.append('Day_'+str(i+1))
         columns.append('prediction')
@@ -217,26 +214,37 @@ class Dataset():
             prediction_dict_list = []
 
             # Reducing the dataset to the trend period studied and the companies in the companies list TODO add string integration for ML 
-            #small_dataset = dataset[['Company']+dataset.columns[day-self.trend_length:day+1].to_list()].fillna(0)
-            small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day+1].to_list()]
+            small_dataset = dataset[['Company']+dataset.columns[day-self.ML_trend_length:day+1].to_list()]
+            #small_dataset = dataset[+dataset.columns[day-self.ML_trend_length:day+1].to_list()]
 
             # Rename columns
             small_dataset.columns = columns
 
-            datasets_lists.append(small_dataset)
+            # One Hot Encoding to add companies as feature
+            Company_features = pd.get_dummies(small_dataset.Company, prefix='Company')
+            small_dataset = pd.concat([Company_features, small_dataset], axis=1)
 
-        # Add columns TODO add string integration for ML 
+            datasets_list.append(small_dataset)
+
+        # Add columns TODO add string integration for ML
         #columns += ['sector', 'country', 'shortName']
 
         # Enrich the data frame with feature
-        ML_dataset = pd.concat(datasets_lists).dropna()
+        ML_dataset = pd.concat(datasets_list).dropna()
         #ML_dataset = ML_dataset.join(supplement_df.set_index('index'), on='Company')
-
-        # Remove row with a 0 as value²
+        
+        #Remove the 'Company Column'
+        ML_dataset.pop('Company')
+        
+        # Keep all Company colums out to avoid losing the 
+        temp_ML_Dataset = ML_dataset[ML_dataset.columns.to_list()[0:len(self.companies_list)]].copy()
+        ML_dataset = ML_dataset.drop(ML_dataset.columns.to_list()[0:len(self.companies_list)], axis=1)
+        # Remove row with a 0 as value
         ML_dataset = ML_dataset.loc[ML_dataset.Day_1 > 0]
-
         # Normalize lines
         ML_dataset = ML_dataset.div(ML_dataset.max(axis=1)*2, axis=0)
+        # Concatenate it again
+        ML_dataset = pd.concat([temp_ML_Dataset, ML_dataset], axis=1).dropna()
         
         # normalize the dataset
         #scaler = MinMaxScaler(feature_range=(0, 1))
@@ -275,7 +283,7 @@ if __name__ == "__main__":
         full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].dt.floor('min')
  
     full_hist.update_crypto('ETH')
-    full_hist.save()
+    #full_hist.save()
     #print(full_hist.hist)
 
     dataset = full_hist.new_format(1000)
