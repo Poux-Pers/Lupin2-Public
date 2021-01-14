@@ -3,7 +3,7 @@
     "Mesh": "1d",
     "trend_length": 5,
     "ML_trend_length": 32,
-    "study_length": 532,
+    "study_length": 37,
     "initial_investment": 5000,
     "transaction_fees_percentage": 0.5,
     "ratio_of_gain_to_save": 0.01,
@@ -14,6 +14,7 @@
     "Companies_list_path": "\\resources\\NASDAQ_Companies_List.csv",
     "hist_path":"\\resources\\full_NASDAQ_history.csv",
     "ML_dataset_path": "\\resources\\ML_Dataset.csv",
+    "LSTM_dataset_path": "\\resources\\ML_Dataset.csv",
     "ML_dataset_parameters_path": "\\parameters\\ML_Dataset_Parameters.json",
     "NN_model_path" : "\\models\\NN",
     "TCN_model_path" : "\\models\\TCN",
@@ -29,9 +30,9 @@
       "graduated_weights": false,
       "random_walks": false,
       "three_in_row": false,
-      "NN": true,
+      "NN": false,
       "TCN": false,
-      "LSTM": false
+      "LSTM": true
     },
     "allow_loss": true,
     "allow_loss_imputation_on_savings": false

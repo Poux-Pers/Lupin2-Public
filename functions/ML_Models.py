@@ -4,6 +4,8 @@
 
 # ---- LIBRARIES -----
 import os
+# Block low level warning
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import csv
 import json
 import keras
@@ -15,6 +17,7 @@ import tensorflow as tf
 from tqdm.auto import tqdm
 from keras.models import Model, Sequential
 from keras.layers import add,Input,Conv1D,Activation,Flatten,Dense, LSTM
+from sklearn.preprocessing import MinMaxScaler
 
 # ---- FUNCTIONS -----
 from functions.Dataset_Class import Dataset
@@ -192,35 +195,46 @@ class ML_Models():
             dataY.append(dataset[i + look_back, 0])
         return(np.array(dataX), np.array(dataY))
 
-    def train_LSTM(self, dataset):
-        # Columns creation
-        columns = []
-        for i in range(self.ML_trend_length):
-            columns.append('Day_'+str(i+1))
+    def train_LSTM(self, dataset, companies_list):
+        if companies_list == []:
+            return()
 
-        # Define input, output and memory
-        X = dataset.loc[:, columns]
-        y = dataset['prediction']
-        look_back = 1
-        
+        else:        
+            # Reducing the dataset only to the companies in the list
+            dataset = dataset[dataset.index.isin(companies_list)]
+
+            for company in tqdm(companies_list):
+                values_list = dataset.loc[company,:].values.astype('float32').reshape(-1, 1)
+                values_list = np.reshape(values_list, (values_list.shape[0], 1, values_list.shape[1]))
+
+                # normalize the dataset
+                scaler = MinMaxScaler(feature_range=(0, 1))
+                values_list = scaler.fit_transform(values_list)
                 
-        # create and fit the LSTM network
-        model = Sequential()
-        model.add(LSTM(4, input_shape=(1, look_back)))
-        model.add(Dense(1))
+                # split into train and test sets
+                train_size = int(len(values_list) * 0.67)
+                test_size = len(values_list) - train_size
+                train, test = values_list[0:train_size,:], values_list[train_size:len(values_list),:]
+                #print(len(train), len(test))
+                
+                # reshape into X=t and Y=t+1
+                look_back = 1
+                trainX, trainY = self.create_dataset(train, look_back)
+                testX, testY = self.create_dataset(test, look_back)
+                
+                # reshape input to be [samples, time steps, features]
+                trainX = np.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
+                testX = np.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
+                
+                # create and fit the LSTM network
+                model = Sequential()
+                model.add(LSTM(4, input_shape=(1, look_back)))
+                model.add(Dense(1))
+                model.compile(loss=tf.losses.MeanSquaredError(), optimizer='adam', metrics=[tf.metrics.MeanAbsoluteError()])
+                model.fit(trainX, trainY, epochs=50, batch_size=1, verbose=2)
 
-        # Compile the keras model
-        model.compile(loss=tf.losses.MeanSquaredError(), optimizer='adam', metrics=[tf.metrics.MeanAbsoluteError()])
-
-        # Fit the keras model on the dataset        
-        model.fit(X, y, epochs=100, batch_size=1, verbose=2)
-
-        # evaluate the keras model
-        _, accuracy = model.evaluate(X, y)
-        print('Average error: %.2f' % (accuracy*100))
-
-        # Save the model
-        model.save(os.getcwd()+self.LSTM_model_path+str(self.ML_trend_length))
+                # Save the model
+                model.save(os.getcwd()+self.LSTM_model_path+'_'+str(company))
 
         return()
 
@@ -229,26 +243,24 @@ class ML_Models():
         with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
             ML_Parameters = json.load(json_file)
 
-        # Verify if the dataset has to be redone
-        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
-            # Hist loading and dataset creation
-            my_hist = Dataset(Parameters)
-            my_hist.load()
-            ML_dataset = my_hist.new_format(len(my_hist.hist))
+        full_hist = Dataset(Parameters)
+        full_hist.load()
 
-            # Create the dataset
-            ML_dataset = my_hist.create_ML_dataset(ML_dataset)
-
-            # Save dataset parameters
-            with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
-                json.dump(self.parameters, json_file)
-
+        if full_hist.date_name != '1m':
+            full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].astype('datetime64[ns]')
         else:
-            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
+            full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].dt.floor('min')
 
-        if not(os.path.exists(os.getcwd()+self.LSTM_model_path+str(self.ML_trend_length))):
-            # Train the dataset
-            self.train_LSTM(ML_dataset)
+        
+        dataset = full_hist.new_format(len(full_hist.hist))
+
+        companies_to_train = []
+
+        for company in self.companies_list:
+            if not(os.path.exists(os.getcwd()+self.LSTM_model_path+'_'+str(company))):
+                companies_to_train.append(company)
+
+        self.train_LSTM(dataset, companies_to_train)
 
 if __name__ == "__main__":
     # Columns creation

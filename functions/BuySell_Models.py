@@ -13,6 +13,7 @@ import pandas as pd
 
 from keras.models import Sequential
 from keras.layers import Dense
+from sklearn.preprocessing import MinMaxScaler
 
 # ---- FUNCTIONS -----
 from functions.Dataset_Class import Dataset
@@ -55,7 +56,8 @@ class BuySell():
         self.models_to_use = Parameters['Models_to_use']
         self.ML_dataset_parameters_path = Parameters['ML_dataset_parameters_path']
         self.NN_model_path = Parameters['NN_model_path']
-        self.TCN_model_path = Parameters['TCN_model_path']
+        self.TCN_model_path = Parameters['TCN_model_path']        
+        self.LSTM_model_path = Parameters['LSTM_model_path']
 
     def trend(self):
         # Creation of the dictionary to calculate trends
@@ -174,7 +176,7 @@ class BuySell():
 
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
-        
+
         # Get max value by list
         maxes_list = self.df.max(axis=1).multiply(2)
 
@@ -404,41 +406,55 @@ class BuySell():
         
         return(BS_dict, prediction_dict, next_variation_dict)
 
-    def LSTM(self, model):
+    def LSTM(self):
         # Same as NN
         # Creation of the dictionary to calculate next values
         prediction_dict = {}
+        predict_list = []
         next_variation_dict = {}
+        next_variation_list = []
 
         # Creation of the dictionary to advise Buy or Sell
         BS_dict = {}
 
-        # Get max value by list
-        maxes_list = self.df.max(axis=1).multiply(2)
+        for company in self.companies_list:
+            # Get Values list
+            values_list = np.array(self.df.loc[company,:].to_list())
+            values_list = np.array([[x] for x in values_list])
+            
+            # Normalize data
+            scaler = MinMaxScaler(feature_range=(0, 1))
+            values_list = scaler.fit_transform(values_list)
 
-        # Batch prediction
-        predict_list = model.predict(self.df.div(maxes_list.to_list(), axis=0))
+            # Reshape            
+            values_list = np.reshape(values_list, (values_list.shape[0], 1, values_list.shape[1]))
+            
+            # Load company model
+            model = keras.models.load_model(os.getcwd()+self.LSTM_model_path+'_'+str(company))
+
+            # Predict
+            predict_list.append(scaler.inverse_transform(model.predict(values_list)))
 
         # Flatten the prediction
-        flat_predict_list = [x[0] for x in predict_list]
-
-        # Multiply the prediction result
-        prediction_dict = maxes_list.multiply(flat_predict_list, axis=0)
+        for x in range(len(self.companies_list)):
+            prediction_dict[self.companies_list[x]] = predict_list[x][0]
 
         # Last values
         last_values = self.df.loc[:,self.df.columns.to_list()[-1]]
 
-        # Calculate the predicted variation 
-        next_variation_df = prediction_dict.div(last_values.to_list(), axis=0).fillna(0)
+        # Calculate the predicted variation
+        for x in range(len(self.companies_list)):
+            next_variation_list.append(predict_list[x][0]/last_values.to_list()[x])
 
         # Creation of the dictionary to advise Buy or Sell
         if len(self.companies_list) > 1:
-            avg_next_variation = np.mean(next_variation_df)
+            avg_next_variation = np.mean(next_variation_list)
         else:
             avg_next_variation = 1
         
-        # Transform df in dict
-        next_variation_dict = next_variation_df.to_dict()
+        # Transform list in dict
+        for x in range(len(self.companies_list)):
+            next_variation_dict[self.companies_list[x]] = predict_list[x][0]
 
         # Buy or Sell dictionary filling
         for company in self.companies_list:

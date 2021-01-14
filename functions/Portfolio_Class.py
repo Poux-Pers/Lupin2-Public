@@ -115,9 +115,6 @@ class Portfolio_class():
             sum_prediction_deviation[company] = 0
             sum_mean_deviation[company] = 0
 
-        print(len(dataset.columns.to_list()))
-        print(len(self.companies_list))
-
         # Reduce the dataset only to the companies in the list
         if len(self.companies_list) > 1:
             dataset = dataset[dataset.index.isin(self.companies_list+['NASDAQ'])]
@@ -133,7 +130,7 @@ class Portfolio_class():
             pre_loaded_model = keras.models.load_model(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
         elif self.models_to_use['LSTM']:
             ML_Models(self.parameters).verify_train_LSTM()
-            pre_loaded_model = keras.models.load_model(os.getcwd()+self.LSTM_model_path+str(self.ML_trend_length))
+            pre_loaded_model = ''
 
         # Visual feedback
         print('Portfolio simulation in progress')
@@ -163,10 +160,13 @@ class Portfolio_class():
 
                 str_model = 'pre_loaded_model'
             
-            elif self.models_to_use['TCN'] or self.models_to_use['LSTM']:
+            elif self.models_to_use['TCN']:
                 small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]]
-
                 str_model = 'pre_loaded_model'
+
+            elif self.models_to_use['LSTM']:
+                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]]
+                str_model = ''
 
             else:
                 small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)

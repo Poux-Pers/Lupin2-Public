@@ -24,6 +24,9 @@ from tqdm.auto import tqdm
 from pycallgraph import PyCallGraph
 from pycallgraph.output import GraphvizOutput
 
+# Block low level warning
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 # ---- FUNCTIONS -----
 from functions.Portfolio_Class import Portfolio_class
 from functions.BuySell_Models import BuySell
@@ -233,6 +236,7 @@ if __name__ == "__main__":
 # Simplify source selction
 # Do a proper scaling(scikit learn)
 # Finish LSTM - https://machinelearningmastery.com/time-series-prediction-lstm-recurrent-neural-networks-python-keras/
+# Turn other feature as on option to be turned on in parameters
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies

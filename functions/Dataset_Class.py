@@ -193,7 +193,7 @@ class Dataset():
 
     def create_ML_dataset(self, dataset):
         datasets_list = []
-        # Reducin the dataset only to the companies in the list
+        # Reducing the dataset only to the companies in the list
         dataset = dataset[dataset.index.isin(self.companies_list)]
         dataset = dataset.reset_index()
 
@@ -236,7 +236,7 @@ class Dataset():
         #Remove the 'Company Column'
         ML_dataset.pop('Company')
         
-        # Keep all Company colums out to avoid losing the 
+        # Keep all Company columns out to avoid losing the 1
         temp_ML_Dataset = ML_dataset[ML_dataset.columns.to_list()[0:len(self.companies_list)]].copy()
         ML_dataset = ML_dataset.drop(ML_dataset.columns.to_list()[0:len(self.companies_list)], axis=1)
         # Remove row with a 0 as value
@@ -250,7 +250,7 @@ class Dataset():
         #scaler = MinMaxScaler(feature_range=(0, 1))
         #dataset = scaler.fit_transform(dataset)
         
-        # Save dataframe and the parameters used
+        # Save dataframe 
         ML_dataset.to_csv(os.getcwd() + self.ML_dataset_path)
 
         return(ML_dataset)
@@ -290,6 +290,6 @@ if __name__ == "__main__":
 
     #print(full_hist.enrich_symbol(['sector', 'country', 'shortName']))
 
-    new_hist = full_hist.create_ML_dataset(dataset)
+    new_hist = full_hist.create_LSTM_dataset(dataset)
     new_hist = new_hist.reset_index(drop=True)
     #print(new_hist)
