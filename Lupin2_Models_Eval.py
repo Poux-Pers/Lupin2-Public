@@ -35,7 +35,7 @@ from functions.ES_interaction import Elasticsearch_class
 from functions.Plot_Class import Plot
 
 # Desactivate warnings
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 
 
 # -------------------- 
@@ -46,7 +46,12 @@ with open(os.getcwd()+'\\parameters\\Parameters.json', 'r') as json_file:
     Parameters = json.load(json_file)
 
 # Opening the log file
-sys.stdout = open(os.getcwd()+'\\models\\logs\\Model_Eval_'+str(Parameters['trend_length'])+'-'+str(Parameters['ML_trend_length'])+'-'+str(Parameters['study_length'])+'.txt', 'w')
+if Parameters['Crypto?']:
+    sys.stdout = open(os.getcwd()+'\\models\\logs\\Crypto\\Model_Eval_'+str(Parameters['trend_length'])+'-'+str(Parameters['ML_trend_length'])+'-'+str(Parameters['study_length'])+'.txt', 'w')
+    print('##### Crypto #####')
+else:
+    sys.stdout = open(os.getcwd()+'\\models\\logs\\NASDAQ\\Model_Eval_'+str(Parameters['trend_length'])+'-'+str(Parameters['ML_trend_length'])+'-'+str(Parameters['study_length'])+'.txt', 'w')
+    print('##### NASDAQ #####')
 
 
 # -------------------- 

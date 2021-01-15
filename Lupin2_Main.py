@@ -26,7 +26,7 @@ from pycallgraph import PyCallGraph
 from pycallgraph.output import GraphvizOutput
 
 # Desactivate warnings
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
 
 # ---- FUNCTIONS -----
 from functions.Portfolio_Class import Portfolio_class
@@ -71,6 +71,7 @@ else:
 
 # Fetching Data to complete nhistory
 if Parameters['Update_Values'] == True:
+    # Beware, this option may take some time depending on internet connection
     if Parameters['Crypto?']:
         full_hist.update_crypto(companies_list)
     else:
@@ -232,9 +233,8 @@ if __name__ == "__main__":
 # Autres fonctions B/S
 # - Trend/seasonality identification
 # - Elliott waves rules
-# - ARMA (Based on volatility)
 # - GARCH (Based on volatility)
-# https://commodity.com/technical-analysis/
+# https://machinelearningmastery.com/time-series-forecasting-methods-in-python-cheat-sheet/
 # Quantdom project
 # Identification de valeurs refuge
 # trust indice based on the historical R² of the company (mainly for the full)

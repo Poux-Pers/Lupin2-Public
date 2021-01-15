@@ -53,12 +53,24 @@ class BuySell():
         self.ratio_max_investment_per_value = Parameters['ratio_max_investment_per_value']
         self.BS_deals_print = Parameters['BS_deals_print']
         self.transaction_fees_percentage = Parameters['transaction_fees_percentage']
-        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
         self.models_to_use = Parameters['Models_to_use']
         self.ML_dataset_parameters_path = Parameters['ML_path']['ML_dataset_parameters_path']
-        self.NN_model_path = Parameters['ML_path']['NN_model_path']
-        self.TCN_model_path = Parameters['ML_path']['TCN_model_path']        
-        self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path']
+
+        if Parameters['Crypto?']:
+            self.hist_path = Parameters['Source_path']['Crypto_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Crypto_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path'] + '_Crypto'
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path'] + '_Crypto'
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path'] + '_Crypto'
+
+        else:
+            self.hist_path = Parameters['Source_path']['Companies_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Companies_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path']
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path']        
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path']
 
     def trend(self):
         # Creation of the dictionary to calculate trends
@@ -352,7 +364,8 @@ class BuySell():
         BS_dict = {}
 
         # Get max value by list
-        maxes_list = self.df.max(axis=1).multiply(2)
+        maxes_list = self.df[self.df.columns[len(self.companies_list):]].max(axis=1).multiply(2)
+        print(maxes_list)
 
         # Batch prediction
         predict_list = model.predict(self.df.div(maxes_list.to_list(), axis=0))

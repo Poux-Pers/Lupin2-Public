@@ -67,10 +67,17 @@ class Dataset():
             self.hist_path = Parameters['Source_path']['Crypto_hist_path']            
             self.companies_list_path = Parameters['Source_path']['Crypto_list_path']
             self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path'] + 'Crypto_'
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path'] + 'Crypto_'
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path'] + 'Crypto_'
+
         else:
             self.hist_path = Parameters['Source_path']['Companies_hist_path']            
             self.companies_list_path = Parameters['Source_path']['Companies_list_path']
             self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path']
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path']        
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path']
             
     def load(self):
         
@@ -137,7 +144,7 @@ class Dataset():
         df_list = []
 
         if type(cryptolist) == list:
-            for crypto in cryptolist:
+            for crypto in tqdm(cryptolist):
                 # Fetch info
                 btc_hist = cryptocompare.get_historical_price_day(crypto, curr='USD', limit=2000)
 
@@ -156,9 +163,14 @@ class Dataset():
                 # Completion with fake values
                 df_hist['Dividends'] = len(df_hist) * [0]
                 df_hist['Stock Splits'] = len(df_hist) * [0]
-                df_hist['Company'] = len(df_hist) * [cryptolist]
+                df_hist['Company'] = crypto
 
                 df_list.append(df_hist)
+
+            # Concat and remove duplicates
+            new_hist = pd.concat([self.hist] + df_list)[self.hist.columns]
+            new_hist = new_hist.drop_duplicates(subset=[self.date_name, 'Company'], keep='last')
+
         else:
             # Fetch info
             btc_hist = cryptocompare.get_historical_price_day(cryptolist, curr='USD', limit=2000)
@@ -180,11 +192,9 @@ class Dataset():
             df_hist['Stock Splits'] = len(df_hist) * [0]
             df_hist['Company'] = len(df_hist) * [cryptolist]
 
-            df_list.append(df_hist)
-
-        # Concat and remove duplicates
-        new_hist = pd.concat([self.hist, df_list])[self.hist.columns]
-        new_hist = new_hist.drop_duplicates(subset=[self.date_name, 'Company'], keep='last')
+            # Concat and remove duplicates
+            new_hist = pd.concat([self.hist, df_hist])[self.hist.columns]
+            new_hist = new_hist.drop_duplicates(subset=[self.date_name, 'Company'], keep='last')
 
         # reset index for the new dataframe
         new_hist = new_hist.reset_index(drop=True)
@@ -264,27 +274,29 @@ class Dataset():
 
         # Enrich the data frame with feature
         ML_dataset = pd.concat(datasets_list).dropna()
-        #ML_dataset = ML_dataset.join(supplement_df.set_index('index'), on='Company')
         
         #Remove the 'Company Column'
         ML_dataset.pop('Company')
         
         # Keep all Company columns out to avoid losing the 1
-        temp_ML_Dataset = ML_dataset[ML_dataset.columns.to_list()[0:len(self.companies_list)]].copy()
-        ML_dataset = ML_dataset.drop(ML_dataset.columns.to_list()[0:len(self.companies_list)], axis=1)
+        #temp_ML_Dataset = ML_dataset[ML_dataset.columns.to_list()[0:len(self.companies_list)]].copy()
+        #ML_dataset = ML_dataset.drop(ML_dataset.columns.to_list()[0:len(self.companies_list)], axis=1)
         # Remove row with a 0 as value
         ML_dataset = ML_dataset.loc[ML_dataset.Day_1 > 0]
+        ML_dataset = ML_dataset.reset_index()
+        ML_dataset.pop('index')
         # Normalize lines
         ML_dataset = ML_dataset.div(ML_dataset.max(axis=1)*2, axis=0)
         # Concatenate it again
-        ML_dataset = pd.concat([temp_ML_Dataset, ML_dataset], axis=1).dropna()
-        
-        # normalize the dataset
-        #scaler = MinMaxScaler(feature_range=(0, 1))
-        #dataset = scaler.fit_transform(dataset)
-        
+        #ML_dataset = pd.concat([temp_ML_Dataset, ML_dataset], axis=1).dropna()
+
+        # Reapply 1 to company columns
+        for company in self.companies_list:
+            ML_dataset['Company_'+ company] = ML_dataset['Company_'+ company].apply(np.ceil)
+
         # Save dataframe 
         ML_dataset.to_csv(os.getcwd() + self.ML_dataset_path)
+        print('ML_Dataset saved')
 
         return(ML_dataset)
 

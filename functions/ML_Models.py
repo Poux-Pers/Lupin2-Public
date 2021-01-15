@@ -40,18 +40,28 @@ class ML_Models():
     def __init__(self, Parameters):        
         self.mesh = Parameters['Mesh']
         self.hist = pd.DataFrame([])
-        self.hist_path = Parameters['Source_path']['Companies_hist_path']
-        self.ML_dataset_path = Parameters['ML_path']['ML_dataset_path']   
-        self.NN_model_path = Parameters['ML_path']['NN_model_path']
-        self.TCN_model_path = Parameters['ML_path']['TCN_model_path']        
-        self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path']
+        self.ML_dataset_path = Parameters['ML_path']['ML_dataset_path']
         self.trend_length = Parameters['trend_length']
         self.ML_trend_length = Parameters['ML_trend_length']
-        self.date_name = ''
-        self.companies_list_path = Parameters['Source_path']['Companies_list_path']
-        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()        
+        self.date_name = ''   
         self.parameters = Parameters
         self.ML_dataset_parameters_path = Parameters['ML_path']['ML_dataset_parameters_path']
+
+        if Parameters['Crypto?']:
+            self.hist_path = Parameters['Source_path']['Crypto_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Crypto_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path'] + 'Crypto_'
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path'] + 'Crypto_'
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path'] + 'Crypto_'
+
+        else:
+            self.hist_path = Parameters['Source_path']['Companies_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Companies_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path']
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path']        
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path']
 
     def train_NN(self, dataset):
         # Columns creation
@@ -91,7 +101,7 @@ class ML_Models():
             ML_Parameters = json.load(json_file)
 
         # Verify if the dataset has to be redone
-        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
+        if ML_Parameters['ML_trend_length'] != self.ML_trend_length or self.parameters['Crypto?'] != ML_Parameters['Crypto?']:
             # Hist loading and dataset creation
             my_hist = Dataset(Parameters)
             my_hist.load()
@@ -168,7 +178,7 @@ class ML_Models():
             ML_Parameters = json.load(json_file)
 
         # Verify if the dataset has to be redone
-        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
+        if ML_Parameters['ML_trend_length'] != self.ML_trend_length or self.parameters['Crypto?'] != ML_Parameters['Crypto?']:
             # Hist loading and dataset creation
             my_hist = Dataset(Parameters)
             my_hist.load()

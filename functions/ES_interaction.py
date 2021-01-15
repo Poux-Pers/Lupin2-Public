@@ -32,11 +32,19 @@ class Elasticsearch_class():
     def __init__(self, Parameters):
         self.es = Elasticsearch([{'host': 'localhost', 'port': 9200}], timeout=30, max_retries=10, retry_on_timeout=True)
         self.mesh = Parameters['Mesh']
-        self.hist = pd.DataFrame([])
-        self.hist_path = Parameters['Source_path']['Comapnies_hist_path']
+        self.hist = pd.DataFrame([])        
         self.date_name = ''
         self.json = {}
         self.parameters = Parameters
+        
+        if Parameters['Crypto?']:
+            self.hist_path = Parameters['Source_path']['Crypto_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Crypto_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+        else:
+            self.hist_path = Parameters['Source_path']['Companies_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Companies_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
 
     def upload_hist(self):
         # Clean index
