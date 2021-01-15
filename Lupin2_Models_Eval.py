@@ -37,6 +37,7 @@ from functions.Plot_Class import Plot
 # Desactivate warnings
 warnings.filterwarnings("ignore")
 
+
 # -------------------- 
 # PARAMETERS
 # -------------------- 
@@ -68,7 +69,7 @@ Portfolio = Portfolio_class(Parameters).reset()
 
 # ------ UPDATE ------
 # Update Companies list if needed
-companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
+companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
 
 # Using only the symbols of the company list
 full_hist.hist[full_hist.hist['Company'].isin(companies_list)]

@@ -63,12 +63,18 @@ else:
 Portfolio = Portfolio_class(Parameters).reset()
 
 # ------ UPDATE ------
+# Update Companies list if needed
+if Parameters['Crypto?']:
+    companies_list = pd.read_csv(os.getcwd() + Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+else:
+    companies_list = pd.read_csv(os.getcwd() + Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
+
 # Fetching Data to complete nhistory
 if Parameters['Update_Values'] == True:
-    full_hist.update('max')
-
-# Update Companies list if needed
-companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
+    if Parameters['Crypto?']:
+        full_hist.update_crypto(companies_list)
+    else:
+        full_hist.update('max')
 
 # Using only the symbols of the company list
 full_hist.hist = full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
@@ -232,7 +238,6 @@ if __name__ == "__main__":
 # Quantdom project
 # Identification de valeurs refuge
 # trust indice based on the historical R² of the company (mainly for the full)
-# Tidy the parameters file
 # Simplify source selction
 # Do a proper scaling(scikit learn)
 # Finish LSTM - https://machinelearningmastery.com/time-series-prediction-lstm-recurrent-neural-networks-python-keras/

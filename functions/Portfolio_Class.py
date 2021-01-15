@@ -43,11 +43,11 @@ class Portfolio_class():
         self.ratio_max_investment_per_value = Parameters['ratio_max_investment_per_value']
         self.BS_deals_print = Parameters['BS_deals_print']
         self.transaction_fees_percentage = Parameters['transaction_fees_percentage']
-        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
+        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
         self.models_to_use = Parameters['Models_to_use']
         self.allow_loss = Parameters['allow_loss']
-        self.NN_model_path = Parameters['NN_model_path']
-        self.TCN_model_path = Parameters['TCN_model_path']
+        self.NN_model_path = Parameters['ML_path']['NN_model_path']
+        self.TCN_model_path = Parameters['ML_path']['TCN_model_path']
         self.ML_trend_length = Parameters['ML_trend_length']
         self.allow_loss_imputation_on_savings = Parameters['allow_loss_imputation_on_savings']
 

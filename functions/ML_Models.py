@@ -22,6 +22,7 @@ from sklearn.preprocessing import MinMaxScaler
 # ---- FUNCTIONS -----
 from functions.Dataset_Class import Dataset
 
+
 # -------------------- 
 # PARAMETERS
 # -------------------- 
@@ -39,18 +40,18 @@ class ML_Models():
     def __init__(self, Parameters):        
         self.mesh = Parameters['Mesh']
         self.hist = pd.DataFrame([])
-        self.hist_path = Parameters['hist_path']
-        self.ML_dataset_path = Parameters['ML_dataset_path']   
-        self.NN_model_path = Parameters['NN_model_path']
-        self.TCN_model_path = Parameters['TCN_model_path']        
-        self.LSTM_model_path = Parameters['LSTM_model_path']
+        self.hist_path = Parameters['Source_path']['Companies_hist_path']
+        self.ML_dataset_path = Parameters['ML_path']['ML_dataset_path']   
+        self.NN_model_path = Parameters['ML_path']['NN_model_path']
+        self.TCN_model_path = Parameters['ML_path']['TCN_model_path']        
+        self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path']
         self.trend_length = Parameters['trend_length']
         self.ML_trend_length = Parameters['ML_trend_length']
         self.date_name = ''
-        self.companies_list_path = Parameters['Companies_list_path']
-        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()        
+        self.companies_list_path = Parameters['Source_path']['Companies_list_path']
+        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()        
         self.parameters = Parameters
-        self.ML_dataset_parameters_path = Parameters['ML_dataset_parameters_path']
+        self.ML_dataset_parameters_path = Parameters['ML_path']['ML_dataset_parameters_path']
 
     def train_NN(self, dataset):
         # Columns creation
@@ -100,11 +101,11 @@ class ML_Models():
             ML_dataset = my_hist.create_ML_dataset(ML_dataset)
 
             # Save dataset parameters
-            with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+            with open(os.getcwd()+self.parameters['ML_path']['ML_dataset_parameters_path'], 'w') as json_file:
                 json.dump(self.parameters, json_file)
 
         else:
-            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
+            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_path']['ML_dataset_path'])
 
         if not(os.path.exists(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))):
             # Train the dataset
@@ -177,11 +178,11 @@ class ML_Models():
             ML_dataset = my_hist.create_ML_dataset(ML_dataset)
 
             # Save dataset parameters
-            with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+            with open(os.getcwd()+self.parameters['ML_path']['ML_dataset_parameters_path'], 'w') as json_file:
                 json.dump(self.parameters, json_file)
             
         else:
-            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
+            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_path']['ML_dataset_path'])
 
         if not(os.path.exists(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))):
             # Train the dataset
@@ -273,7 +274,7 @@ if __name__ == "__main__":
 
     print(columns)
     # Load Dataset
-    dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'], usecols=columns)
+    dataset = pd.read_csv(os.getcwd()+Parameters['ML_path']['ML_dataset_path'], usecols=columns)
 
     print(dataset)
 

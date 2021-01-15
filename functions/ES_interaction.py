@@ -33,7 +33,7 @@ class Elasticsearch_class():
         self.es = Elasticsearch([{'host': 'localhost', 'port': 9200}], timeout=30, max_retries=10, retry_on_timeout=True)
         self.mesh = Parameters['Mesh']
         self.hist = pd.DataFrame([])
-        self.hist_path = Parameters['hist_path']
+        self.hist_path = Parameters['Source_path']['Comapnies_hist_path']
         self.date_name = ''
         self.json = {}
         self.parameters = Parameters
@@ -124,14 +124,7 @@ class Elasticsearch_class():
         # Create index
         self.es.indices.create(index='portfolio',body={})
         self.es.indices.create(index='my_portfolio',body={})
-
-def rec_to_actions(df, es_id):
-    import json
-    INDEX="my_portfolio"
-    for record in df.to_dict(orient="records"):
-        yield ('{ "index" : { "_index" : "%s", "_id": "%s" }}'% (INDEX, es_id))
-        yield (json.dumps(record, default=int))
-        
+       
     
 if __name__ == "__main__":
     es_dict = Elasticsearch_class(Parameters)

@@ -1,0 +1,299 @@
+1. bitcoin logo, btc Bitcoin (BTC)
+The first and most well-known cryptocurrency has gone through dramatic rises and falls.
+
+2. ethereum logo, eth Ethereum (ETH)
+Bitcoin’s biggest rival with a key focus on smart contracts and dApps.
+
+3. ripple logo, xrp Ripple (XRP)
+The fastest cryptocurrency to date, however, it is centralised which is off-putting for some.
+
+4. bitcoin cash logo, bch Bitcoin Cash (BCH)
+A clone of Bitcoin with blocks eight times larger.
+
+5. litecoin logo, ltc Litecoin (LTC)
+One of the oldest altcoins, four times faster than Bitcoin.
+
+6. binance coin logo, bnb Binance Coin (BNB)
+A cryptocurrency that gives traders discounts on the Binance exchange.
+
+7. tether logo, usdt Tether (USDT)
+A cryptocurrency supposedly tied to the US dollar.
+
+8. eos logo EOS (EOS)
+Ethereum’s closest rival for smart contracts and dApps.
+
+9. bitcoin sv logo, bsv Bitcoin SV (BSV)
+A clone of Bitcoin Cash that attempts to follow Satoshi Nakamoto’s original vision.
+
+10. monero logo, xmr Monero (XMR)
+The most well-known privacy coin.
+
+11. stellar logo, xlm Stellar (XLM)
+Created to facilitate cross-asset transfer, Ripple’s little brother.
+
+12. tron logo, trx TRON (TRX)
+A platform for decentralising online content.
+
+13. cardano logo, ada Cardano (ADA)
+Third generation cryptocurrency trying to improve upon Bitcoin and Ethereum.
+
+14. unus sed leo logo UNUS SED LEO (LEO)
+Utility token for the Bitfinex exchange.
+
+15. dash logo Dash (DASH)
+Facilitates both private transactions and instant transactions.
+
+16. tezos logo, xtz Tezos (XTZ)
+Smart contract platform attempting to compete with Ethereum.
+
+17. chainlink logo, link Chainlink (LINK)
+Another smart contract platform attempting to compete with Ethereum
+
+18.  NEO (NEO)
+The ‘Chinese’ Ethereum that can be coded in multiple languages.
+
+19. iota logo, miota IOTA (MIOTA)
+Attempts to speed up transactions using the Internet of things and a DAG algorithm.
+
+20. cosmos logo, atom Cosmos (ATOM)
+Wants to be the Internet of blockchains.
+
+21. ethereum classic logo, etc Ethereum Classic (ETC)
+The old Ethereum blockchain where the DAO hack still occurred.
+
+22.  NEM (XEM)
+Centralised blockchain without miners.
+
+23. maker logo, mkr Maker (MKR)
+A cryptocurrency that allows people to make collateralised debt positions.
+
+24. ontology logo, ont Ontology (ONT)
+Targeting enterprise adoption and use of blockchain technology.
+
+25. zcash logo, zec Zcash (ZEC)
+Another cryptocurrency with a focus on privacy
+
+26. crypto.com chain logo, cro Crypto.com Chain (CRO)
+A token that allows cross-asset settlement.
+
+27. usd coin logo, usdc USD Coin (USDC)
+Yet another stablecoin tied to the US dollar.
+
+28. v systems logo, vsys V Systems (VSYS)
+A blockchain cloud database that also supports dApps.
+
+29. dogecoin logo, doge Dogecoin (DOGE)
+A cryptocurrency based around the Doge meme.
+
+30. decred logo, dcr Decred (DCR)
+A cryptocurrency with a focus on on-chain governance.
+
+31. bitcoin gold logo, btg Bitcoin Gold (BTG)
+A fork of Bitcoin that uses GPU mining.
+
+32. vechain logo, vet VeChain (VET)
+A platform designed to enhance supply chain management processes.
+
+33. qtum logo Qtum (QTUM)
+Taking the best parts of Bitcoin and Ethereum and mixing them together.
+
+34. basic attention token logo, bat Basic Attention Token (BAT)
+A token designed to transform the digital advertising world.
+
+35. hedge trade logo, hedg HedgeTrade (HEDG)
+Using blockchain technology to create a social platform for traders.
+
+36. huobi token logo, ht Huobi Token (HT)
+A cryptocurrency used on the Huobi exchange.
+
+37. omisego logo, omg OmiseGO (OMG)
+A project aiming to ‘unbank the banked’.
+
+38. egretia logo, egt Egretia (EGT)
+A HTML5 blockchain platform for building apps.
+
+39. paxos standard token logo, pax Paxos Standard Token (PAX)
+Yet another stablecoin tied to the US dollar.
+
+40. trueusd logo,tusd TrueUSD (TUSD)
+And another cryptocurrency supposedly tied to the US dollar.
+
+41. lisk logo, lsk Lisk (LSK)
+Wants to bring blockchain development to the masses.
+
+42. bittorrent logo, btt BitTorrent (BTT)
+Utility token for BitTorrent.
+
+43. kucoin shares logo, kcs KuCoin Shares (KCS)
+Utility token for the KuCoin exchange.
+
+44. ravencoin logo, rvn Ravencoin (RVN)
+A platform for creating your own asset.
+
+45. nano logo, nano Nano (NANO)
+Designed to be super-fast, scalable and without fees.
+
+46. bitcoin diamond logo, bcd Bitcoin Diamond (BCD)
+A fork of Bitcoin with a max supply 10 times larger.
+
+47. energi logo, nrg Energi (NRG)
+Highly modified fork of Dash.
+
+48. waves coin logo, waves Waves (WAVES)
+Supposedly the fastest blockchain where users can create their own tokens.
+
+49. holo coin logo, holo Holo (HOT)
+An alternative to blockchain which may be good for building dApps.
+
+50. pundi x coin logo, npxs Pundi X (NPXS)
+Planning to make it easier for merchants and customers to do use cryptocurrency.
+
+51. monacoin logo, mona MonaCoin (MONA)
+A Japanese cryptocurrency based on the popular ASCII art character, Mona.
+
+52. lambda coin logo, lamb Lambda (LAMB)
+Another project that plans to use blockchain for data storage.
+
+53. augur logo, rep Augur (REP)
+Decentralised prediction market platform for traders.
+
+54. bitshares logo, bts BitShares (BTS)
+Aims to solve the issue of scaling.
+
+55. digibyte logo, dgb DigiByte (DGB)
+Built to be faster and more scalable than Bitcoin.
+
+56. educare logo, ekt EDUCare (EKT)
+A multi-chain, multi-consensus blockchain for dApps.
+
+57. 0x logo, zrx 0x (ZRX)
+A platform for exchanging digitalised tokens.
+
+58. aurora logo, aoa Aurora (AOA)
+Creating a decentralised crypto-banking experience.
+
+59. quant logo, qnt Quant (QNT)
+Building an OS to connect multiple blockchains.
+
+60. icon logo, icx ICON (ICX)
+Another decentralised project to bring together multiple blockchains.
+
+61. iost logo, iost IOST (IOST)
+A blockchain that uses a ‘proof of believability’ algorithm.
+
+62. gxchain logo, gxc GXChain (GXC)
+A permissionless blockchain designed to create a trusted data Internet of value. 
+
+63. nash exchange logo, nex Nash Exchange (NEX)
+Cryptocurrency for the Nash Exchange.
+
+64. bytom logo, btm Bytom (BTM)
+Digitalising assets to make them easier to exchange.
+
+65. bytecoin logo, bcn Bytecoin (BCN)
+Another private and untraceable cryptocurrency.
+
+66. siacoin logo, sc Siacoin (SC)
+A decentralised cloud storage platform.
+
+67. theta logo, theta THETA (THETA)
+Creating an infrastructure for decentralised video streaming.
+
+68. insight chain logo, inb Insight Chain (INB)
+Aiming to establish the world's first big data ecosystem public blockchain.
+
+69. komodo logo, kmd Komodo (KMD)
+A platform for building ‘smart chains’.
+
+70. mixin logo, xin Mixin (XIN)
+Attempting to create interoperability amongst different blockchains.
+
+71. abbc coin logo, abbc ABBC Coin (ABBC)
+Attempting to improve problems related to e-commerce.
+
+72. hypercash logo, hc HyperCash (HC)
+Another cryptocurrency trying to create interoperability between different blockchains.
+
+73. ren logo, ren Ren (REN)
+Also trying to create interoperability between different blockchains.
+
+74. verge logo, xvg Verge (XVG)
+Another secure and anonymous cryptocurrency.
+
+75. maidsafe coin logo, maid MaidSafe Coin (MAID)
+Another project attempting to decentralise the Internet.
+
+76. zilliqa logo, zil Zilliqa (ZIL)
+Developing a high throughput blockchain.
+
+77. aeternity logo, ae Aeternity (AE)
+Creating smart contracts that use real-time data.
+
+78. u network logo, uuu U Network (UUU)
+A decentralised protocol for publishing and valuing online content.
+
+79. dai logo, dai Dai (DAI)
+A stablecoin not tied to any fiat.
+
+80. steem logo, steem Steem (STEEM)
+A blockchain-based social media platform.
+
+81. vestchain logo, vest VestChain (VEST)
+An open-source blockchain for smart contracts and machine learning services.
+
+82. japan content token logo, jct Japan Content Token (JCT)
+A cryptocurrency for issuing tickets for events in Japan.
+
+83. status logo, snt Status (SNT)
+A mobile Ethereum-based operating system.
+
+84. waltonchain logo, wtc Waltonchain (WTC)
+Similar to IOTA in how it wants to integrate the Internet of things with blockchain.
+
+85. zcoin logo, xzc Zcoin (XZC)
+A privacy coin that uses the ‘Sigma Protocol’.
+
+86.   NEXT (NET)
+Attempting to become the ‘next’ generation of advanced solutions for global transactions.
+
+87. rif token logo, rif RIF Token (RIF)
+Building an easy to use OS for blockchain technology.
+
+88. ardor logo, ardr Ardor (ARDR)
+A blockchain platform designed for business.
+
+89. crypto.com logo, mco Crypto.com (MCO)
+A coin to raise money for Crypto.com, has a working relationship with Visa.
+
+90. Metaverse logo, etp Metaverse ETP (ETP)
+Building a web of ‘smart properties’ where value can flow freely.
+
+91. xmax logo, xmx XMax (XMX)
+Building an entertainment-focused blockchain ecosystem.
+
+92. enjin coin logo, enj Enjin Coin (ENJ)
+A cryptocurrency for building blockchain games.
+
+93. wax logo, wax WAX (WAX)
+A platform to buy, sell, create or trade virtual items.
+
+94. golem logo, gnt Golem (GNT)
+Decentralising computing power, receive rewards for sharing your computing power. 
+
+95. maximine coin logo, mxm MaxiMine Coin (MXM)
+Cloud-based mining platform where users receive MaxiMine rewards by staking tokens.
+
+96. grin logo, grin Grin (GRIN)
+Marrying privacy with speed.
+
+97. aelf logo, elf Aelf (ELF)
+Building a decentralised cloud computing blockchain network.
+
+98. clipper coin logo, cccx Clipper Coin (CCCX)
+Aims to become the Goldman Sachs of the cryptocurrency market.
+
+99. elastos logo, ela Elastos (ELA)
+Aiming to create a blockchain-based Internet.
+
+100. nexo logo, nexo Nexo (NEXO)
+Loan them your crypto and get cash in return.

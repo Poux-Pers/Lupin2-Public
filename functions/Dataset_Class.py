@@ -55,17 +55,23 @@ class Dataset():
 
     def __init__(self, Parameters):
         self.mesh = Parameters['Mesh']
-        self.hist = pd.DataFrame([])
-        self.hist_path = Parameters['hist_path']
-        self.ML_dataset_path = Parameters['ML_dataset_path']
+        self.hist = pd.DataFrame([])        
+        self.ML_dataset_path = Parameters['ML_path']['ML_dataset_path']
         self.trend_length = Parameters['trend_length']
         self.ML_trend_length = Parameters['ML_trend_length']
         self.parameters = Parameters
         self.date_name = ''
-        self.companies_list_path = Parameters['Companies_list_path']
-        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
         self.study_length = Parameters['study_length']
 
+        if Parameters['Crypto?']:
+            self.hist_path = Parameters['Source_path']['Crypto_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Crypto_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+        else:
+            self.hist_path = Parameters['Source_path']['Companies_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Companies_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
+            
     def load(self):
         
         if self.mesh == '1m':
@@ -127,34 +133,61 @@ class Dataset():
 
         return(self.hist)
 
-    def update_crypto(self, cryptoname):
-        # Fetch info
-        btc_hist = cryptocompare.get_historical_price_day(cryptoname, curr='USD', limit=2000)
+    def update_crypto(self, cryptolist):
+        df_list = []
 
-        # Load
-        df_hist = pd.DataFrame(btc_hist)
+        if type(cryptolist) == list:
+            for crypto in cryptolist:
+                # Fetch info
+                btc_hist = cryptocompare.get_historical_price_day(crypto, curr='USD', limit=2000)
 
-        # Time format
-        df_hist['time'] = pd.to_datetime(df_hist['time'], unit='s')
+                # Load
+                df_hist = pd.DataFrame(btc_hist)
 
-        # Rename
-        df_hist = df_hist.rename(columns={"time": "Date", "open": "Open", "high": "High", "low": "Low", "close": "Close", "volumeto": "Volume"})
+                # Time format
+                df_hist['time'] = pd.to_datetime(df_hist['time'], unit='s')
 
-        # Reorder columns
-        df_hist = df_hist[['Date','Open','High','Low','Close','Volume']]
+                # Rename
+                df_hist = df_hist.rename(columns={"time": "Date", "open": "Open", "high": "High", "low": "Low", "close": "Close", "volumeto": "Volume"})
 
-        # Completion with fake values
-        df_hist['Dividends'] = len(df_hist) * [0]
-        df_hist['Stock Splits'] = len(df_hist) * [0]
-        df_hist['Company'] = len(df_hist) * [cryptoname]
+                # Reorder columns
+                df_hist = df_hist[['Date','Open','High','Low','Close','Volume']]
+
+                # Completion with fake values
+                df_hist['Dividends'] = len(df_hist) * [0]
+                df_hist['Stock Splits'] = len(df_hist) * [0]
+                df_hist['Company'] = len(df_hist) * [cryptolist]
+
+                df_list.append(df_hist)
+        else:
+            # Fetch info
+            btc_hist = cryptocompare.get_historical_price_day(cryptolist, curr='USD', limit=2000)
+
+            # Load
+            df_hist = pd.DataFrame(btc_hist)
+
+            # Time format
+            df_hist['time'] = pd.to_datetime(df_hist['time'], unit='s')
+
+            # Rename
+            df_hist = df_hist.rename(columns={"time": "Date", "open": "Open", "high": "High", "low": "Low", "close": "Close", "volumeto": "Volume"})
+
+            # Reorder columns
+            df_hist = df_hist[['Date','Open','High','Low','Close','Volume']]
+
+            # Completion with fake values
+            df_hist['Dividends'] = len(df_hist) * [0]
+            df_hist['Stock Splits'] = len(df_hist) * [0]
+            df_hist['Company'] = len(df_hist) * [cryptolist]
+
+            df_list.append(df_hist)
 
         # Concat and remove duplicates
-        new_hist = pd.concat([self.hist, df_hist])[self.hist.columns]
+        new_hist = pd.concat([self.hist, df_list])[self.hist.columns]
         new_hist = new_hist.drop_duplicates(subset=[self.date_name, 'Company'], keep='last')
 
         # reset index for the new dataframe
         new_hist = new_hist.reset_index(drop=True)
-        new_hist
 
         # Update Company list
         with open(os.getcwd() + self.companies_list_path, 'w', newline='') as f:
