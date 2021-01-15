@@ -16,6 +16,7 @@ import sys
 import time
 import json
 import keras
+import warnings
 import datetime
 import math as ma
 import numpy as np
@@ -33,6 +34,8 @@ from functions.Dataset_Class import Dataset
 from functions.ES_interaction import Elasticsearch_class
 from functions.Plot_Class import Plot
 
+# Desactivate warnings
+warnings.filterwarnings("ignore")
 
 # -------------------- 
 # PARAMETERS
@@ -151,6 +154,20 @@ print('----- 3 in a row -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 print('----- Average R2: '+str(R2)+' -----')
 
+# ARIMA
+# Reset other models
+for model in Parameters['Models_to_use']:
+    Parameters['Models_to_use'][model] = False
+
+Parameters['Models_to_use']['ARIMA'] = True
+Portfolio = Portfolio_class(Parameters)
+Portfolio.reset()
+last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+print('----- ARIMA -----')
+print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
+
 # NN
 # Reset other models
 for model in Parameters['Models_to_use']:
@@ -179,22 +196,7 @@ print('----- TCN -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 print('----- Average R2: '+str(R2)+' -----')
 
-# Close the log file
-sys.stdout.close()
-
-# LSTM
-# Reset other models
-for model in Parameters['Models_to_use']:
-    Parameters['Models_to_use'][model] = False
-
-Parameters['Models_to_use']['LSTM'] = True
-Portfolio = Portfolio_class(Parameters)
-Portfolio.reset()
-last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
-
-print('----- LSTM -----')
-print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
-print('----- Average R2: '+str(R2)+' -----')
+# LSTM won't be trated in this file as it would need too much computational power with this configuration
 
 # Close the log file
 sys.stdout.close()

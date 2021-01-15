@@ -14,6 +14,7 @@
 import os
 import time
 import json
+import warnings
 import datetime
 import math as ma
 import numpy as np
@@ -24,8 +25,8 @@ from tqdm.auto import tqdm
 from pycallgraph import PyCallGraph
 from pycallgraph.output import GraphvizOutput
 
-# Block low level warning
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# Desactivate warnings
+warnings.filterwarnings("ignore")
 
 # ---- FUNCTIONS -----
 from functions.Portfolio_Class import Portfolio_class
@@ -225,13 +226,12 @@ if __name__ == "__main__":
 # Autres fonctions B/S
 # - Trend/seasonality identification
 # - Elliott waves rules
-# - ARMA
-# - GARCH
+# - ARMA (Based on volatility)
+# - GARCH (Based on volatility)
 # https://commodity.com/technical-analysis/
 # Quantdom project
 # Identification de valeurs refuge
 # trust indice based on the historical R² of the company (mainly for the full)
-# predict multiple companies at the same time
 # Tidy the parameters file
 # Simplify source selction
 # Do a proper scaling(scikit learn)
