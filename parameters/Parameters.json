@@ -1,25 +1,34 @@
 {
     "Update_Values": false,
+    "BS_deals_print": false,
+    "Optimization_run": false,
+    "Performance_analysis_run": false,
     "Mesh": "1d",
     "trend_length": 5,
     "ML_trend_length": 32,
-    "study_length": 2032,
+    "study_length": 132,
     "initial_investment": 5000,
     "transaction_fees_percentage": 0.5,
-    "ratio_of_gain_to_save": 0,
+    "ratio_of_gain_to_save": 0.01,
     "ratio_max_investment_per_value": 0.25,
-    "BS_deals_print": true,
-    "Optimization_run": false,
-    "Performance_analysis_run": false,
-    "Companies_list_path": "\\resources\\NASDAQ_Companies_List.csv",
-    "hist_path":"\\resources\\full_NASDAQ_history.csv",
-    "ML_dataset_path": "\\resources\\ML_Dataset.csv",
-    "ML_dataset_parameters_path": "\\parameters\\ML_Dataset_Parameters.json",
-    "NN_model_path" : "\\models\\NN",
-    "TCN_model_path" : "\\models\\TCN",
+    "Crypto?": false,
+    "Source_path":{
+      "Companies_list_path": "\\resources\\NASDAQ_Companies_List.csv",
+      "Crypto_list_path": "\\resources\\Cryptocurrencies_List.csv",
+      "Companies_hist_path":"\\resources\\full_NASDAQ_history.csv",
+      "Crypto_hist_path":"\\resources\\Crypto_history.csv"
+    },
+    "ML_path": {
+      "ML_dataset_path": "\\resources\\ML_Dataset.csv",
+      "LSTM_dataset_path": "\\resources\\ML_Dataset.csv",
+      "ML_dataset_parameters_path": "\\parameters\\ML_Dataset_Parameters.json",
+      "NN_model_path" : "\\models\\NN\\",
+      "TCN_model_path" : "\\models\\TCN\\",
+      "LSTM_model_path" : "\\models\\LSTM\\"
+    },
     "ES": {
-      "Send_to_ES": true,
-      "Delay?": true,
+      "Send_to_ES": false,
+      "Delay?": false,
       "Delay (in seconds)": 10
     },
     "Plot_Graph": true,
@@ -28,8 +37,10 @@
       "graduated_weights": false,
       "random_walks": false,
       "three_in_row": false,
+      "ARIMA": false,
       "NN": true,
-      "TCN": false      
+      "TCN": false,
+      "LSTM": false
     },
     "allow_loss": true,
     "allow_loss_imputation_on_savings": false

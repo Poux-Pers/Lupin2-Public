@@ -43,13 +43,28 @@ class Portfolio_class():
         self.ratio_max_investment_per_value = Parameters['ratio_max_investment_per_value']
         self.BS_deals_print = Parameters['BS_deals_print']
         self.transaction_fees_percentage = Parameters['transaction_fees_percentage']
-        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
         self.models_to_use = Parameters['Models_to_use']
         self.allow_loss = Parameters['allow_loss']
-        self.NN_model_path = Parameters['NN_model_path']
-        self.TCN_model_path = Parameters['TCN_model_path']
+        self.NN_model_path = Parameters['ML_path']['NN_model_path']
+        self.TCN_model_path = Parameters['ML_path']['TCN_model_path']
         self.ML_trend_length = Parameters['ML_trend_length']
-        self.allow_loss_imputation_on_savings = Parameters['allow_loss_imputation_on_savings']
+        self.allow_loss_imputation_on_savings = Parameters['allow_loss_imputation_on_savings']        
+
+        if Parameters['Crypto?']:
+            self.hist_path = Parameters['Source_path']['Crypto_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Crypto_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path'] + 'Crypto_'
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path'] + 'Crypto_'
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path'] + 'Crypto_'
+
+        else:
+            self.hist_path = Parameters['Source_path']['Companies_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Companies_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path']
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path']        
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path']
 
     def create(self):
         # This function will create a portfolio structure if it doesn't already exists
@@ -75,7 +90,10 @@ class Portfolio_class():
 
     def reset(self):
         # This function will remove the existing portfolio to create it again withthe current structure
-        os.remove(self.path)
+        try:
+            os.remove(self.path)
+        except:
+            print('Portfolio created')
         return(self.create())
 
     def update(self, new_portfolio):
@@ -128,6 +146,9 @@ class Portfolio_class():
         elif self.models_to_use['TCN']:
             ML_Models(self.parameters).verify_train_TCN()
             pre_loaded_model = keras.models.load_model(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))
+        elif self.models_to_use['LSTM']:
+            ML_Models(self.parameters).verify_train_LSTM()
+            pre_loaded_model = ''
 
         # Visual feedback
         print('Portfolio simulation in progress')
@@ -138,10 +159,33 @@ class Portfolio_class():
             prediction_dict_list = []
             deals_history_dict[day] = []
 
+            # Get Company_features for ML
+            Company_features = pd.get_dummies(dataset.index, prefix='Company')
+
             # Reducing the dataset to the trend period studied and the companies in the companies list
-            if self.models_to_use['NN'] or self.models_to_use['TCN']:
-                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
+            if self.models_to_use['NN']:
+                small_dataset = dataset[dataset.columns[day-self.ML_trend_length+1:day]]
+                
+                # Need to remove index to concat
+                small_dataset = small_dataset.reset_index()
+                small_dataset.pop('Company')
+
+                # Add company features
+                small_dataset = pd.concat([Company_features, small_dataset], axis=1)  
+
+                # Put back the index for what's coming next
+                small_dataset.index = self.companies_list + ['NASDAQ']
+
                 str_model = 'pre_loaded_model'
+            
+            elif self.models_to_use['TCN']:
+                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]]
+                str_model = 'pre_loaded_model'
+
+            elif self.models_to_use['LSTM']:
+                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]]
+                str_model = ''
+
             else:
                 small_dataset = dataset[dataset.columns[day-self.trend_length:day]].fillna(0)
                 str_model = ''
@@ -149,7 +193,7 @@ class Portfolio_class():
             # Accuracy measurment (R²)
             if day != self.ML_trend_length:
                 for company in self.companies_list:
-                    values_list = small_dataset.loc[company,:].to_list()
+                    values_list = small_dataset.loc[company,:].to_list()[-self.ML_trend_length:]
                     sum_prediction_deviation[company] += (prediction_dict[company] - values_list[-1])**2
                     sum_mean_deviation[company] += (np.mean(values_list) - values_list[-1])**2
 

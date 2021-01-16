@@ -4,6 +4,8 @@
 
 # ---- LIBRARIES -----
 import os
+# Block low level warning
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import csv
 import json
 import keras
@@ -14,10 +16,12 @@ import tensorflow as tf
 
 from tqdm.auto import tqdm
 from keras.models import Model, Sequential
-from keras.layers import add,Input,Conv1D,Activation,Flatten,Dense
+from keras.layers import add,Input,Conv1D,Activation,Flatten,Dense, LSTM
+from sklearn.preprocessing import MinMaxScaler
 
 # ---- FUNCTIONS -----
 from functions.Dataset_Class import Dataset
+
 
 # -------------------- 
 # PARAMETERS
@@ -36,21 +40,32 @@ class ML_Models():
     def __init__(self, Parameters):        
         self.mesh = Parameters['Mesh']
         self.hist = pd.DataFrame([])
-        self.hist_path = Parameters['hist_path']
-        self.ML_dataset_path = Parameters['ML_dataset_path']   
-        self.NN_model_path = Parameters['NN_model_path']
-        self.TCN_model_path = Parameters['TCN_model_path']
+        self.ML_dataset_path = Parameters['ML_path']['ML_dataset_path']
         self.trend_length = Parameters['trend_length']
         self.ML_trend_length = Parameters['ML_trend_length']
-        self.date_name = ''
-        self.companies_list_path = Parameters['Companies_list_path']
-        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()        
+        self.date_name = ''   
         self.parameters = Parameters
-        self.ML_dataset_parameters_path = Parameters['ML_dataset_parameters_path']
+        self.ML_dataset_parameters_path = Parameters['ML_path']['ML_dataset_parameters_path']
+
+        if Parameters['Crypto?']:
+            self.hist_path = Parameters['Source_path']['Crypto_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Crypto_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path'] + 'Crypto_'
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path'] + 'Crypto_'
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path'] + 'Crypto_'
+
+        else:
+            self.hist_path = Parameters['Source_path']['Companies_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Companies_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path']
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path']        
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path']
 
     def train_NN(self, dataset):
         # Columns creation
-        columns = []
+        columns = ['Company_' + company for company in self.companies_list]
         for i in range(self.ML_trend_length):
             columns.append('Day_'+str(i+1))
 
@@ -60,7 +75,7 @@ class ML_Models():
         
         # Define the keras model
         model = Sequential()
-        model.add(Dense(12, input_dim=self.ML_trend_length, activation='relu'))
+        model.add(Dense(12, input_dim=len(columns), activation='relu'))
         model.add(Dense(8, activation='relu'))
         model.add(Dense(8, activation='relu'))
         model.add(Dense(1, activation='sigmoid'))
@@ -86,7 +101,7 @@ class ML_Models():
             ML_Parameters = json.load(json_file)
 
         # Verify if the dataset has to be redone
-        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
+        if ML_Parameters['ML_trend_length'] != self.ML_trend_length or self.parameters['Crypto?'] != ML_Parameters['Crypto?']:
             # Hist loading and dataset creation
             my_hist = Dataset(Parameters)
             my_hist.load()
@@ -96,11 +111,11 @@ class ML_Models():
             ML_dataset = my_hist.create_ML_dataset(ML_dataset)
 
             # Save dataset parameters
-            with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+            with open(os.getcwd()+self.parameters['ML_path']['ML_dataset_parameters_path'], 'w') as json_file:
                 json.dump(self.parameters, json_file)
 
         else:
-            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
+            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_path']['ML_dataset_path'])
 
         if not(os.path.exists(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))):
             # Train the dataset
@@ -163,7 +178,7 @@ class ML_Models():
             ML_Parameters = json.load(json_file)
 
         # Verify if the dataset has to be redone
-        if ML_Parameters['ML_trend_length'] != self.ML_trend_length:
+        if ML_Parameters['ML_trend_length'] != self.ML_trend_length or self.parameters['Crypto?'] != ML_Parameters['Crypto?']:
             # Hist loading and dataset creation
             my_hist = Dataset(Parameters)
             my_hist.load()
@@ -173,16 +188,90 @@ class ML_Models():
             ML_dataset = my_hist.create_ML_dataset(ML_dataset)
 
             # Save dataset parameters
-            with open(os.getcwd()+self.parameters['ML_dataset_parameters_path'], 'w') as json_file:
+            with open(os.getcwd()+self.parameters['ML_path']['ML_dataset_parameters_path'], 'w') as json_file:
                 json.dump(self.parameters, json_file)
             
         else:
-            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'])
+            ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_path']['ML_dataset_path'])
 
         if not(os.path.exists(os.getcwd()+self.TCN_model_path+str(self.ML_trend_length))):
             # Train the dataset
             self.train_TCN(ML_dataset)
 
+    def create_dataset(self, dataset, look_back=1):
+        dataX, dataY = [], []
+        for i in range(len(dataset)-look_back-1):
+            a = dataset[i:(i+look_back), 0]
+            dataX.append(a)
+            dataY.append(dataset[i + look_back, 0])
+        return(np.array(dataX), np.array(dataY))
+
+    def train_LSTM(self, dataset, companies_list):
+        if companies_list == []:
+            return()
+
+        else:        
+            # Reducing the dataset only to the companies in the list
+            dataset = dataset[dataset.index.isin(companies_list)]
+
+            for company in tqdm(companies_list):
+                values_list = dataset.loc[company,:].values.astype('float32').reshape(-1, 1)
+                values_list = np.reshape(values_list, (values_list.shape[0], 1, values_list.shape[1]))
+
+                # normalize the dataset
+                scaler = MinMaxScaler(feature_range=(0, 1))
+                values_list = scaler.fit_transform(values_list)
+                
+                # split into train and test sets
+                train_size = int(len(values_list) * 0.67)
+                test_size = len(values_list) - train_size
+                train, test = values_list[0:train_size,:], values_list[train_size:len(values_list),:]
+                #print(len(train), len(test))
+                
+                # reshape into X=t and Y=t+1
+                look_back = 1
+                trainX, trainY = self.create_dataset(train, look_back)
+                testX, testY = self.create_dataset(test, look_back)
+                
+                # reshape input to be [samples, time steps, features]
+                trainX = np.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
+                testX = np.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
+                
+                # create and fit the LSTM network
+                model = Sequential()
+                model.add(LSTM(4, input_shape=(1, look_back)))
+                model.add(Dense(1))
+                model.compile(loss=tf.losses.MeanSquaredError(), optimizer='adam', metrics=[tf.metrics.MeanAbsoluteError()])
+                model.fit(trainX, trainY, epochs=50, batch_size=1, verbose=2)
+
+                # Save the model
+                model.save(os.getcwd()+self.LSTM_model_path+'_'+str(company))
+
+        return()
+
+    def verify_train_LSTM(self):
+        # Load parameters used during model training and if trend different than current param re-create model and train and save param
+        with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
+            ML_Parameters = json.load(json_file)
+
+        full_hist = Dataset(Parameters)
+        full_hist.load()
+
+        if full_hist.date_name != '1m':
+            full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].astype('datetime64[ns]')
+        else:
+            full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].dt.floor('min')
+
+        
+        dataset = full_hist.new_format(len(full_hist.hist))
+
+        companies_to_train = []
+
+        for company in self.companies_list:
+            if not(os.path.exists(os.getcwd()+self.LSTM_model_path+'_'+str(company))):
+                companies_to_train.append(company)
+
+        self.train_LSTM(dataset, companies_to_train)
 
 if __name__ == "__main__":
     # Columns creation
@@ -195,7 +284,7 @@ if __name__ == "__main__":
 
     print(columns)
     # Load Dataset
-    dataset = pd.read_csv(os.getcwd()+Parameters['ML_dataset_path'], usecols=columns)
+    dataset = pd.read_csv(os.getcwd()+Parameters['ML_path']['ML_dataset_path'], usecols=columns)
 
     print(dataset)
 

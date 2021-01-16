@@ -16,6 +16,7 @@ import sys
 import time
 import json
 import keras
+import warnings
 import datetime
 import math as ma
 import numpy as np
@@ -33,6 +34,9 @@ from functions.Dataset_Class import Dataset
 from functions.ES_interaction import Elasticsearch_class
 from functions.Plot_Class import Plot
 
+# Desactivate warnings
+#warnings.filterwarnings("ignore")
+
 
 # -------------------- 
 # PARAMETERS
@@ -42,7 +46,12 @@ with open(os.getcwd()+'\\parameters\\Parameters.json', 'r') as json_file:
     Parameters = json.load(json_file)
 
 # Opening the log file
-sys.stdout = open(os.getcwd()+'\\models\\logs\\Model_Eval_'+str(Parameters['trend_length'])+'-'+str(Parameters['ML_trend_length'])+'-'+str(Parameters['study_length'])+'.txt', 'w')
+if Parameters['Crypto?']:
+    sys.stdout = open(os.getcwd()+'\\models\\logs\\Crypto\\Model_Eval_'+str(Parameters['trend_length'])+'-'+str(Parameters['ML_trend_length'])+'-'+str(Parameters['study_length'])+'.txt', 'w')
+    print('##### Crypto #####')
+else:
+    sys.stdout = open(os.getcwd()+'\\models\\logs\\NASDAQ\\Model_Eval_'+str(Parameters['trend_length'])+'-'+str(Parameters['ML_trend_length'])+'-'+str(Parameters['study_length'])+'.txt', 'w')
+    print('##### NASDAQ #####')
 
 
 # -------------------- 
@@ -65,7 +74,7 @@ Portfolio = Portfolio_class(Parameters).reset()
 
 # ------ UPDATE ------
 # Update Companies list if needed
-companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
+companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
 
 # Using only the symbols of the company list
 full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
@@ -151,6 +160,20 @@ print('----- 3 in a row -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 print('----- Average R2: '+str(R2)+' -----')
 
+# ARIMA
+# Reset other models
+for model in Parameters['Models_to_use']:
+    Parameters['Models_to_use'][model] = False
+
+Parameters['Models_to_use']['ARIMA'] = True
+Portfolio = Portfolio_class(Parameters)
+Portfolio.reset()
+last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
+
+print('----- ARIMA -----')
+print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
+print('----- Average R2: '+str(R2)+' -----')
+
 # NN
 # Reset other models
 for model in Parameters['Models_to_use']:
@@ -178,6 +201,8 @@ last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simul
 print('----- TCN -----')
 print('----- Relative ROI: '+str(int((Portfolio_history_list[-1]['ROI']/(sum(dataset[dataset.columns[-1]])/sum(dataset[dataset.columns[0]])))*1000)/1000)+' -----')
 print('----- Average R2: '+str(R2)+' -----')
+
+# LSTM won't be trated in this file as it would need too much computational power with this configuration
 
 # Close the log file
 sys.stdout.close()

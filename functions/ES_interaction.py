@@ -32,11 +32,19 @@ class Elasticsearch_class():
     def __init__(self, Parameters):
         self.es = Elasticsearch([{'host': 'localhost', 'port': 9200}], timeout=30, max_retries=10, retry_on_timeout=True)
         self.mesh = Parameters['Mesh']
-        self.hist = pd.DataFrame([])
-        self.hist_path = Parameters['hist_path']
+        self.hist = pd.DataFrame([])        
         self.date_name = ''
         self.json = {}
         self.parameters = Parameters
+        
+        if Parameters['Crypto?']:
+            self.hist_path = Parameters['Source_path']['Crypto_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Crypto_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+        else:
+            self.hist_path = Parameters['Source_path']['Companies_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Companies_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
 
     def upload_hist(self):
         # Clean index
@@ -99,7 +107,7 @@ class Elasticsearch_class():
 
         self.es.indices.refresh(index='hist_'+self.mesh)
 
-    def upload_dict(self, my_dict, es_id):        
+    def upload_dict(self, my_dict, es_id):
         # Portfolio enrichment
         my_dict['id'] = es_id
 
@@ -108,13 +116,23 @@ class Elasticsearch_class():
 
         self.es.indices.refresh(index='portfolio')
 
+        # Loading in bulk companies information
+        df = pd.DataFrame(my_dict['Shares'])
+        df['id'] = [es_id] * len(df)
+        df.dropna(inplace = True)
+        df = df.reset_index()
+        documents = df.to_dict(orient='records')
+        bulk(self.es, documents, index='my_portfolio', raise_on_error=True)
+
     def reset_portfolio_index(self):        
         # Clean index
         self.es.indices.delete(index='portfolio', ignore=[400, 404])
+        self.es.indices.delete(index='my_portfolio', ignore=[400, 404])
 
         # Create index
         self.es.indices.create(index='portfolio',body={})
-        
+        self.es.indices.create(index='my_portfolio',body={})
+       
     
 if __name__ == "__main__":
     es_dict = Elasticsearch_class(Parameters)

@@ -12,6 +12,8 @@ import pandas as pd
 import yfinance as yf
 
 from tqdm.auto import tqdm
+#from sklearn.preprocessing import MinMaxScaler
+#from sklearn.metrics import mean_squared_error
 
 
 # -------------------- 
@@ -53,17 +55,30 @@ class Dataset():
 
     def __init__(self, Parameters):
         self.mesh = Parameters['Mesh']
-        self.hist = pd.DataFrame([])
-        self.hist_path = Parameters['hist_path']
-        self.ML_dataset_path = Parameters['ML_dataset_path']
+        self.hist = pd.DataFrame([])        
+        self.ML_dataset_path = Parameters['ML_path']['ML_dataset_path']
         self.trend_length = Parameters['trend_length']
         self.ML_trend_length = Parameters['ML_trend_length']
         self.parameters = Parameters
         self.date_name = ''
-        self.companies_list_path = Parameters['Companies_list_path']
-        self.companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
-        
+        self.study_length = Parameters['study_length']
 
+        if Parameters['Crypto?']:
+            self.hist_path = Parameters['Source_path']['Crypto_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Crypto_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path'] + 'Crypto_'
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path'] + 'Crypto_'
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path'] + 'Crypto_'
+
+        else:
+            self.hist_path = Parameters['Source_path']['Companies_hist_path']            
+            self.companies_list_path = Parameters['Source_path']['Companies_list_path']
+            self.companies_list = pd.read_csv(os.getcwd() +Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
+            self.NN_model_path = Parameters['ML_path']['NN_model_path']
+            self.TCN_model_path = Parameters['ML_path']['TCN_model_path']        
+            self.LSTM_model_path = Parameters['ML_path']['LSTM_model_path']
+            
     def load(self):
         
         if self.mesh == '1m':
@@ -125,34 +140,64 @@ class Dataset():
 
         return(self.hist)
 
-    def update_crypto(self, cryptoname):
-        # Fetch info
-        btc_hist = cryptocompare.get_historical_price_day(cryptoname, curr='USD', limit=2000)
+    def update_crypto(self, cryptolist):
+        df_list = []
 
-        # Load
-        df_hist = pd.DataFrame(btc_hist)
+        if type(cryptolist) == list:
+            for crypto in tqdm(cryptolist):
+                # Fetch info
+                btc_hist = cryptocompare.get_historical_price_day(crypto, curr='USD', limit=2000)
 
-        # Time format
-        df_hist['time'] = pd.to_datetime(df_hist['time'], unit='s')
+                # Load
+                df_hist = pd.DataFrame(btc_hist)
 
-        # Rename
-        df_hist = df_hist.rename(columns={"time": "Date", "open": "Open", "high": "High", "low": "Low", "close": "Close", "volumeto": "Volume"})
+                # Time format
+                df_hist['time'] = pd.to_datetime(df_hist['time'], unit='s')
 
-        # Reorder columns
-        df_hist = df_hist[['Date','Open','High','Low','Close','Volume']]
+                # Rename
+                df_hist = df_hist.rename(columns={"time": "Date", "open": "Open", "high": "High", "low": "Low", "close": "Close", "volumeto": "Volume"})
 
-        # Completion with fake values
-        df_hist['Dividends'] = len(df_hist) * [0]
-        df_hist['Stock Splits'] = len(df_hist) * [0]
-        df_hist['Company'] = len(df_hist) * [cryptoname]
+                # Reorder columns
+                df_hist = df_hist[['Date','Open','High','Low','Close','Volume']]
 
-        # Concat and remove duplicates
-        new_hist = pd.concat([self.hist, df_hist])[self.hist.columns]
-        new_hist = new_hist.drop_duplicates(subset=[self.date_name, 'Company'], keep='last')
+                # Completion with fake values
+                df_hist['Dividends'] = len(df_hist) * [0]
+                df_hist['Stock Splits'] = len(df_hist) * [0]
+                df_hist['Company'] = crypto
+
+                df_list.append(df_hist)
+
+            # Concat and remove duplicates
+            new_hist = pd.concat([self.hist] + df_list)[self.hist.columns]
+            new_hist = new_hist.drop_duplicates(subset=[self.date_name, 'Company'], keep='last')
+
+        else:
+            # Fetch info
+            btc_hist = cryptocompare.get_historical_price_day(cryptolist, curr='USD', limit=2000)
+
+            # Load
+            df_hist = pd.DataFrame(btc_hist)
+
+            # Time format
+            df_hist['time'] = pd.to_datetime(df_hist['time'], unit='s')
+
+            # Rename
+            df_hist = df_hist.rename(columns={"time": "Date", "open": "Open", "high": "High", "low": "Low", "close": "Close", "volumeto": "Volume"})
+
+            # Reorder columns
+            df_hist = df_hist[['Date','Open','High','Low','Close','Volume']]
+
+            # Completion with fake values
+            df_hist['Dividends'] = len(df_hist) * [0]
+            df_hist['Stock Splits'] = len(df_hist) * [0]
+            df_hist['Company'] = len(df_hist) * [cryptolist]
+
+            # Concat and remove duplicates
+            new_hist = pd.concat([self.hist, df_hist])[self.hist.columns]
+            new_hist = new_hist.drop_duplicates(subset=[self.date_name, 'Company'], keep='last')
 
         # reset index for the new dataframe
         new_hist = new_hist.reset_index(drop=True)
-        new_hist
 
         # Update Company list
         with open(os.getcwd() + self.companies_list_path, 'w', newline='') as f:
@@ -190,53 +235,68 @@ class Dataset():
         return(dataset)
 
     def create_ML_dataset(self, dataset):
-        datasets_lists = []
-        # Reducin the dataset only to the companies in the list
+        datasets_list = []
+        # Reducing the dataset only to the companies in the list
         dataset = dataset[dataset.index.isin(self.companies_list)]
         dataset = dataset.reset_index()
 
         # Dataset enrichment
         #supplement_df = self.enrich_symbol(['sector', 'country', 'shortName'])
         #supplement_df = supplement_df.reset_index()
-        
-        # Visual feedback
-        print('Portfolio simulation in progress')
 
         # Columns creation
-        columns = []
+        columns = ['Company']
         for i in range(self.ML_trend_length):
             columns.append('Day_'+str(i+1))
         columns.append('prediction')
 
-        for day in tqdm(range(self.ML_trend_length+1, len(dataset.columns.to_list())-1)):
+        # Let's not take the period we study for training :)
+        for day in tqdm(range(self.ML_trend_length+1, len(dataset.columns.to_list())-self.study_length)):
             # Reinitialization
             BS_dict_list = []
             prediction_dict_list = []
 
             # Reducing the dataset to the trend period studied and the companies in the companies list TODO add string integration for ML 
-            #small_dataset = dataset[['Company']+dataset.columns[day-self.trend_length:day+1].to_list()].fillna(0)
-            small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day+1].to_list()]
+            small_dataset = dataset[['Company']+dataset.columns[day-self.ML_trend_length:day+1].to_list()]
+            #small_dataset = dataset[+dataset.columns[day-self.ML_trend_length:day+1].to_list()]
 
             # Rename columns
             small_dataset.columns = columns
 
-            datasets_lists.append(small_dataset)
+            # One Hot Encoding to add companies as feature
+            Company_features = pd.get_dummies(small_dataset.Company, prefix='Company')
+            small_dataset = pd.concat([Company_features, small_dataset], axis=1)
 
-        # Add columns TODO add string integration for ML 
+            datasets_list.append(small_dataset)
+
+        # Add columns TODO add string integration for ML
         #columns += ['sector', 'country', 'shortName']
 
         # Enrich the data frame with feature
-        ML_dataset = pd.concat(datasets_lists).dropna()
-        #ML_dataset = ML_dataset.join(supplement_df.set_index('index'), on='Company')
-
-        # Remove row with a 0 as value²
+        ML_dataset = pd.concat(datasets_list).dropna()
+        
+        #Remove the 'Company Column'
+        ML_dataset.pop('Company')
+        
+        # Keep all Company columns out to avoid losing the 1
+        #temp_ML_Dataset = ML_dataset[ML_dataset.columns.to_list()[0:len(self.companies_list)]].copy()
+        #ML_dataset = ML_dataset.drop(ML_dataset.columns.to_list()[0:len(self.companies_list)], axis=1)
+        # Remove row with a 0 as value
         ML_dataset = ML_dataset.loc[ML_dataset.Day_1 > 0]
-
+        ML_dataset = ML_dataset.reset_index()
+        ML_dataset.pop('index')
         # Normalize lines
         ML_dataset = ML_dataset.div(ML_dataset.max(axis=1)*2, axis=0)
-        
-        # Save dataframe and the parameters used
+        # Concatenate it again
+        #ML_dataset = pd.concat([temp_ML_Dataset, ML_dataset], axis=1).dropna()
+
+        # Reapply 1 to company columns
+        for company in self.companies_list:
+            ML_dataset['Company_'+ company] = ML_dataset['Company_'+ company].apply(np.ceil)
+
+        # Save dataframe 
         ML_dataset.to_csv(os.getcwd() + self.ML_dataset_path)
+        print('ML_Dataset saved')
 
         return(ML_dataset)
 
@@ -268,13 +328,13 @@ if __name__ == "__main__":
         full_hist.hist[full_hist.date_name] = full_hist.hist[full_hist.date_name].dt.floor('min')
  
     full_hist.update_crypto('ETH')
-    full_hist.save()
+    #full_hist.save()
     #print(full_hist.hist)
 
     dataset = full_hist.new_format(1000)
 
     #print(full_hist.enrich_symbol(['sector', 'country', 'shortName']))
 
-    new_hist = full_hist.create_ML_dataset(dataset)
+    new_hist = full_hist.create_LSTM_dataset(dataset)
     new_hist = new_hist.reset_index(drop=True)
     #print(new_hist)

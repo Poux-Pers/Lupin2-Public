@@ -14,6 +14,7 @@
 import os
 import time
 import json
+import warnings
 import datetime
 import math as ma
 import numpy as np
@@ -23,6 +24,9 @@ import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 from pycallgraph import PyCallGraph
 from pycallgraph.output import GraphvizOutput
+
+# Desactivate warnings
+#warnings.filterwarnings("ignore")
 
 # ---- FUNCTIONS -----
 from functions.Portfolio_Class import Portfolio_class
@@ -59,12 +63,19 @@ else:
 Portfolio = Portfolio_class(Parameters).reset()
 
 # ------ UPDATE ------
+# Update Companies list if needed
+if Parameters['Crypto?']:
+    companies_list = pd.read_csv(os.getcwd() + Parameters['Source_path']['Crypto_list_path'])['Companies'].to_list()
+else:
+    companies_list = pd.read_csv(os.getcwd() + Parameters['Source_path']['Companies_list_path'])['Companies'].to_list()
+
 # Fetching Data to complete nhistory
 if Parameters['Update_Values'] == True:
-    full_hist.update('max')
-
-# Update Companies list if needed
-companies_list = pd.read_csv(os.getcwd() +Parameters['Companies_list_path'])['Companies'].to_list()
+    # Beware, this option may take some time depending on internet connection
+    if Parameters['Crypto?']:
+        full_hist.update_crypto(companies_list)
+    else:
+        full_hist.update('max')
 
 # Using only the symbols of the company list
 full_hist.hist = full_hist.hist[full_hist.hist['Company'].isin(companies_list)]
@@ -222,15 +233,15 @@ if __name__ == "__main__":
 # Autres fonctions B/S
 # - Trend/seasonality identification
 # - Elliott waves rules
-# - ARMA
-# - GARCH
-# https://commodity.com/technical-analysis/
+# - GARCH (Based on volatility)
+# https://machinelearningmastery.com/time-series-forecasting-methods-in-python-cheat-sheet/
 # Quantdom project
 # Identification de valeurs refuge
 # trust indice based on the historical R² of the company (mainly for the full)
-# predict multiple companies at the same time
-# Tidy the parameters file
 # Simplify source selction
+# Do a proper scaling(scikit learn)
+# Finish LSTM - https://machinelearningmastery.com/time-series-prediction-lstm-recurrent-neural-networks-python-keras/
+# Turn other feature as on option to be turned on in parameters
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
