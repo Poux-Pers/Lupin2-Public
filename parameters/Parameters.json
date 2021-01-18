@@ -37,8 +37,8 @@
       "graduated_weights": false,
       "random_walks": false,
       "three_in_row": false,
-      "ARIMA": false,
-      "NN": true,
+      "ARIMA": true,
+      "NN": false,
       "TCN": false,
       "LSTM": false
     },

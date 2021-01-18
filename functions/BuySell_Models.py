@@ -311,7 +311,7 @@ class BuySell():
         for company in self.df.index:
             values_list = self.df.loc[company,:].to_list()
 
-            model = ARIMA(values_list, order=('', 1, 0))
+            model = ARIMA(values_list, order=(3, 1, 1))
             model_fit = model.fit()
             # make prediction
             prediction_dict[company] = model_fit.predict(len(values_list), len(values_list), typ='levels')

@@ -164,7 +164,7 @@ class Portfolio_class():
 
             # Reducing the dataset to the trend period studied and the companies in the companies list
             if self.models_to_use['NN']:
-                small_dataset = dataset[dataset.columns[day-self.ML_trend_length+1:day]]
+                small_dataset = dataset[dataset.columns[day-self.ML_trend_length+1:day]].fillna(0)
                 
                 # Need to remove index to concat
                 small_dataset = small_dataset.reset_index()
@@ -179,11 +179,11 @@ class Portfolio_class():
                 str_model = 'pre_loaded_model'
             
             elif self.models_to_use['TCN']:
-                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]]
+                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
                 str_model = 'pre_loaded_model'
 
-            elif self.models_to_use['LSTM']:
-                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]]
+            elif self.models_to_use['LSTM'] or self.models_to_use['ARIMA']:
+                small_dataset = dataset[dataset.columns[day-self.ML_trend_length:day]].fillna(0)
                 str_model = ''
 
             else:
