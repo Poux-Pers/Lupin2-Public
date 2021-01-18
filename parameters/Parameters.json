@@ -8,7 +8,7 @@
     "ML_trend_length": 32,
     "study_length": 132,
     "initial_investment": 5000,
-    "transaction_fees_percentage": 0.5,
+    "transaction_fees_percentage": 0,
     "ratio_of_gain_to_save": 0.01,
     "ratio_max_investment_per_value": 0.25,
     "Crypto?": false,
