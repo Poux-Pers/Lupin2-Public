@@ -8,6 +8,7 @@ import json
 import keras
 import random
 import datetime
+import math as ma
 import numpy as np
 import pandas as pd
 
@@ -195,10 +196,10 @@ class BuySell():
             values_list = self.df.loc[company,:].to_list()
 
             # calculate next value
-            variance = np.var(values_list)
+            standard_deviation = ma.sqrt(np.var(values_list))
             mean = np.mean(values_list)
 
-            prediction_dict[company] = (random.choice([-1, 0, 1])) * variance + mean
+            prediction_dict[company] = (random.choice([-1, 0, 1])) * standard_deviation + mean
             if values_list[-1] > 0:
                 next_variation_dict[company] = prediction_dict[company] / values_list[-1]
             else:
@@ -251,13 +252,13 @@ class BuySell():
             values_list = self.df.loc[company,:].to_list()
 
             # calculate next value
-            variance = np.var(values_list[-3:])
+            standard_deviation = ma.sqrt(np.var(values_list[-3:]))
 
             # Decide the next value based on the last 3 values
             if values_list[-3] < values_list[-2] < values_list[-1]:
-                prediction_dict[company] = values_list[-1] + variance
+                prediction_dict[company] = values_list[-1] + standard_deviation
             elif values_list[-3] > values_list[-2] > values_list[-1]:
-                prediction_dict[company] = values_list[-1] - variance
+                prediction_dict[company] = values_list[-1] - standard_deviation
             else:
                 prediction_dict[company] = values_list[-1]
 
@@ -310,7 +311,7 @@ class BuySell():
         for company in self.df.index:
             values_list = self.df.loc[company,:].to_list()
 
-            model = ARIMA(values_list, order=(1, 1, 1))
+            model = ARIMA(values_list, order=(3, 1, 1))
             model_fit = model.fit()
             # make prediction
             prediction_dict[company] = model_fit.predict(len(values_list), len(values_list), typ='levels')
@@ -365,7 +366,6 @@ class BuySell():
 
         # Get max value by list
         maxes_list = self.df[self.df.columns[len(self.companies_list):]].max(axis=1).multiply(2)
-        print(maxes_list)
 
         # Batch prediction
         predict_list = model.predict(self.df.div(maxes_list.to_list(), axis=0))

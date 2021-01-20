@@ -35,7 +35,7 @@ from functions.ES_interaction import Elasticsearch_class
 from functions.Plot_Class import Plot
 
 # Desactivate warnings
-#warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore")
 
 
 # -------------------- 
