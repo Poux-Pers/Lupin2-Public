@@ -37,10 +37,10 @@
       "graduated_weights": false,
       "random_walks": false,
       "three_in_row": false,
-      "ARIMA": true,
+      "ARIMA": false,
       "NN": false,
       "TCN": false,
-      "LSTM": false
+      "LSTM": true
     },
     "allow_loss": true,
     "allow_loss_imputation_on_savings": false

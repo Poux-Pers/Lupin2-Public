@@ -111,7 +111,7 @@ class Dataset():
                     hist[self.date_name] = hist[self.date_name].dt.strftime('%Y-%m-%d %H:%M:%S')
                     hist[self.date_name] = hist[self.date_name].dt.floor('min')
                 else:
-                    hist[self.date_name] = hist[self.date_name].astype('datetime64[ns]')
+                    hist[self.date_name] = hist[self.date_name].dt.tz_localize(None).astype('datetime64[ns]')
                 
                 hist[self.date_name] = pd.to_datetime(hist[self.date_name])
                 
@@ -214,7 +214,7 @@ class Dataset():
 
     def new_format(self, study_length):
         # TCD to set date in columns, have a sum of the companies
-        TCD = pd.pivot_table(self.hist, 'Open', index=['Company'], columns=[self.date_name], aggfunc=np.sum, margins=True, margins_name='NASDAQ').fillna(method='ffill', axis=1)
+        TCD = pd.pivot_table(self.hist, 'Open', index=['Company'], columns=[self.date_name], aggfunc=np.sum, margins=True, margins_name='NASDAQ').ffill(axis=1)
         
         # Keeping only the NASDAQ row
         TCD = TCD.drop(columns=['NASDAQ'])

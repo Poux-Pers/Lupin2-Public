@@ -96,12 +96,18 @@ class ML_Models():
         return()
     
     def verify_train_NN(self):
+        need_new_dataset = False
+        
         # Load parameters used during model training and if trend different than current param re-create model and train and save param
         with open(os.getcwd()+self.ML_dataset_parameters_path, 'r') as json_file:
             ML_Parameters = json.load(json_file)
 
+        # Check if there is a dataset already created or it requires a new one
+        if not(os.path.exists(os.getcwd()+Parameters['ML_path']['ML_dataset_path'])):
+            need_new_dataset = True
+
         # Verify if the dataset has to be redone
-        if ML_Parameters['ML_trend_length'] != self.ML_trend_length or self.parameters['Crypto?'] != ML_Parameters['Crypto?']:
+        if need_new_dataset or (ML_Parameters['ML_trend_length'] != self.ML_trend_length or self.parameters['Crypto?'] != ML_Parameters['Crypto?']):
             # Hist loading and dataset creation
             my_hist = Dataset(Parameters)
             my_hist.load()
@@ -117,7 +123,7 @@ class ML_Models():
         else:
             ML_dataset = pd.read_csv(os.getcwd()+Parameters['ML_path']['ML_dataset_path'])
 
-        if not(os.path.exists(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))):
+        if need_new_dataset or not(os.path.exists(os.getcwd()+self.NN_model_path+str(self.ML_trend_length))):
             # Train the dataset
             self.train_NN(ML_dataset)
 

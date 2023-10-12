@@ -173,6 +173,18 @@ if __name__ == "__main__":
         Parameters['initial_investment'] = 5000
 
         plt.show()
+        
+
+
+        initial_investment
+
+    elif Parameters['Performance_analysis_run']:
+        print('***** BEWARE : This must be run as an administrator to fully function. *****')
+        with PyCallGraph(output=GraphvizOutput()):
+            # ------- RUN --------
+            Portfolio = Portfolio_class(Parameters)
+            Portfolio.reset()
+            last_portfolio, Portfolio_history_list, R2, deals_history_dict = Portfolio.simulation(dataset, Portfolio.portfolio)
 
     else:
         # ------- RUN --------
@@ -230,7 +242,7 @@ if __name__ == "__main__":
 # Do a proper scaling(scikit learn)
 # Finish LSTM - https://machinelearningmastery.com/time-series-prediction-lstm-recurrent-neural-networks-python-keras/
 # Turn other feature as on option to be turned on in parameters
-# Update ARIMA functionality
+# Delete pycallgraph functionality
 
 # Further TODO
 # Place companies on the map: color countries by medium company price/number of companies
